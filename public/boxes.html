@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="pt-br" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <title>MyFinance - Caixinhas</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet" />
+
+  <!-- Navbar + base visual (você já vem usando esses padrões) -->
+  <link href="assets/css/navbar.css" rel="stylesheet" />
+  <link href="assets/css/transactions.css" rel="stylesheet" />
+
+  <!-- CSS específico da página -->
+  <link href="assets/css/boxes.css" rel="stylesheet" />
+</head>
+
+<body>
+  <!-- Navbar carregada via fetch -->
+  <div id="loadNavbar"></div>
+
+  <!-- Alert container (utils.js usa isso) -->
+  <div id="alert-container"
+       class="position-fixed top-0 start-50 translate-middle-x mt-3"
+       style="z-index: 1055; width: 90%; max-width: 420px;"></div>
+
+  <div class="container mt-4">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <h3 class="mb-0">
+        <i class="fa-solid fa-piggy-bank me-2"></i>Caixinhas
+      </h3>
+
+      <button class="btn btn-primary" id="newBoxBtn" type="button">
+        <i class="fa-solid fa-plus me-2"></i>Nova Caixinha
+      </button>
+    </div>
+
+    <div id="boxesGrid" class="row g-3"></div>
+
+    <div id="emptyBoxes" class="d-none text-center py-5">
+      <i class="fa-solid fa-piggy-bank fa-3x mb-3 text-muted"></i>
+      <h6 class="text-muted">Nenhuma caixinha criada</h6>
+      <p class="small text-muted mb-3">Crie sua primeira caixinha para organizar suas finanças.</p>
+      <button class="btn btn-primary" id="emptyCreateBtn" type="button">
+        <i class="fa-solid fa-plus me-2"></i>Criar Caixinha
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal Nova Caixinha (vamos usar depois no JS) -->
+  <div class="modal fade" id="boxModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="fa-solid fa-piggy-bank text-primary me-2"></i>
+            Nova Caixinha
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Nome</label>
+            <input class="form-control" id="boxName" placeholder="Ex.: Reserva, Viagem..." />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Valor inicial (opcional)</label>
+            <input class="form-control" id="boxInitialValue" type="number" step="0.01" placeholder="0,00" />
+          </div>
+
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="boxIsEmergency" />
+            <label class="form-check-label" for="boxIsEmergency">
+              Marcar como reserva de emergência
+            </label>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-danger" data-bs-dismiss="modal" type="button">Cancelar</button>
+          <button class="btn btn-success" id="saveBoxBtn" type="button">
+            <i class="fa-solid fa-check me-2"></i>Salvar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Criar/Editar Caixinha -->
+<div class="modal fade" id="boxModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="boxModalTitle">
+          <i class="fa-solid fa-piggy-bank text-primary me-2"></i>
+          Nova Caixinha
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <input type="hidden" id="boxId" />
+
+        <div class="mb-3">
+          <label class="form-label">Nome</label>
+          <input class="form-control" id="boxName" placeholder="Ex.: Reserva, Viagem..." />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Valor inicial (somente ao criar)</label>
+          <input class="form-control" id="boxInitialValue" type="number" step="0.01" placeholder="0,00" />
+          <div class="form-text">Ao editar, movimentações devem ser feitas em “Depositar/Retirar”.</div>
+        </div>
+
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="boxIsEmergency" />
+          <label class="form-check-label" for="boxIsEmergency">
+            Marcar como reserva de emergência
+          </label>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancelar</button>
+        <button class="btn btn-success" id="saveBoxBtn" type="button">
+          <i class="fa-solid fa-check me-2"></i>Salvar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Movimentar (Depositar/Retirar) -->
+<div class="modal fade" id="moveModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="moveModalTitle">
+          <i class="fa-solid fa-right-left text-primary me-2"></i>
+          Movimentar
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <input type="hidden" id="moveBoxId" />
+        <input type="hidden" id="moveType" />
+
+        <div class="mb-2 small text-muted" id="moveBoxName"></div>
+
+        <div class="mb-3">
+          <label class="form-label">Valor</label>
+          <input class="form-control" id="moveValue" type="number" step="0.01" placeholder="0,00" />
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-danger" data-bs-dismiss="modal" type="button">Cancelar</button>
+        <button class="btn btn-success" id="confirmMoveBtn" type="button">
+          <i class="fa-solid fa-check me-2"></i>Confirmar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Confirmar Exclusão -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fa-solid fa-triangle-exclamation text-danger me-2"></i>
+          Confirmar exclusão
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <input type="hidden" id="deleteBoxId" />
+        <p class="mb-1">Tem certeza que deseja excluir esta caixinha?</p>
+        <p class="text-muted small mb-0">Esta ação não pode ser desfeita.</p>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-success" data-bs-dismiss="modal" type="button">Cancelar</button>
+        <button class="btn btn-danger" id="confirmDeleteBtn" type="button">
+          <i class="fa-solid fa-trash me-2"></i>Excluir
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script src="js/api.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/loadNavbar.js"></script>
+  <script src="js/profileMenu.js"></script>
+  <script src="js/boxes.js"></script>
+</body>
+</html>

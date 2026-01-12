@@ -1,0 +1,208 @@
+/* assets/css/navbar.css */
+
+/* ===== NAVBAR PERSONALIZADA (escopada) ===== */
+.mf-navbar {
+  /* primária dinâmica (vem do perfil via applyAppColor -> --mf-primary/--mf-primary-rgb) */
+  --mf-primary: var(--mf-primary, #3b82f6);
+  --mf-primary-rgb: var(--mf-primary-rgb, 59, 130, 246);
+
+  background: linear-gradient(135deg, #1e40af 0%, var(--mf-primary) 100%) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.22);
+  padding: 0.75rem 0;
+}
+
+.mf-navbar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.modal-backdrop {
+  z-index: 0!important;
+}
+/* Brand + ícone carteira */
+.mf-navbar .navbar-brand {
+  font-weight: 800;
+  font-size: 1.45rem;
+  letter-spacing: 0.2px;
+  background: linear-gradient(135deg, #ffffff, #dbeafe);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mf-navbar .navbar-brand i.fa-wallet {
+  font-size: 1.35rem;
+  /* faz o ícone “herdar” o gradiente do texto */
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Links */
+.mf-navbar .navbar-nav .nav-link {
+  color: rgba(255, 255, 255, 0.92) !important;
+  padding: 0.55rem 0.95rem !important;
+  border-radius: 10px;
+  margin: 0 2px;
+  transition: transform 0.2s ease, background-color 0.2s ease, opacity 0.2s ease;
+  font-weight: 600;
+  opacity: 0.95;
+}
+
+.mf-navbar .navbar-nav .nav-link:hover,
+.mf-navbar .navbar-nav .nav-link.active,
+.mf-navbar .navbar-nav .nav-link[aria-current="page"] {
+  background: rgba(255, 255, 255, 0.16);
+  transform: translateY(-1px);
+  opacity: 1;
+}
+
+.mf-navbar .navbar-nav .nav-link i {
+  width: 20px;
+  text-align: center;
+}
+
+/* ===== Botões da navbar (melhorados) ===== */
+.mf-navbar .btn.btn-sm {
+  padding: 0.48rem 0.85rem;
+  font-size: 0.92rem;
+  line-height: 1.1;
+  border-radius: 10px;
+}
+
+/* Theme dropdown button */
+.mf-navbar #themeBtn {
+  gap: 0.45rem;
+}
+
+/* Outline light */
+.mf-navbar .btn-outline-light {
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #fff;
+  transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.mf-navbar .btn-outline-light:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.65);
+  transform: translateY(-1px);
+}
+
+/* Dropdown menu */
+.mf-navbar .dropdown-menu {
+  min-width: 220px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* melhora contraste do dropdown no dark/light */
+[data-bs-theme="dark"] .mf-navbar .dropdown-menu {
+  background: rgba(15, 23, 42, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+[data-bs-theme="light"] .mf-navbar .dropdown-menu {
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(2, 6, 23, 0.08);
+}
+
+.mf-navbar .dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.55rem 0.85rem;
+}
+
+.mf-navbar .dropdown-item i {
+  width: 20px;
+  text-align: center;
+}
+
+/* Navbar toggler (mobile) */
+.mf-navbar .navbar-toggler {
+  border-color: rgba(255, 255, 255, 0.35);
+  border-radius: 10px;
+  padding: 0.4rem 0.6rem;
+}
+
+/* ===== Mobile ===== */
+@media (max-width: 576px) {
+  .mf-navbar {
+    padding: 0.6rem 0;
+  }
+
+  .mf-navbar .navbar-brand {
+    font-size: 1.3rem;
+  }
+
+  .mf-navbar .btn.btn-sm {
+    padding: 0.52rem 0.75rem;
+    font-size: 0.95rem;
+  }
+
+  .mf-navbar .navbar-nav .nav-link {
+    margin: 3px 0;
+    padding: 0.65rem 0.9rem !important;
+  }
+}
+
+/* ===== Avatar ===== */
+.mf-navbar .user-avatar-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.mf-navbar .user-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.mf-navbar .user-avatar-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  color: #fff;
+  user-select: none;
+}
+
+.mf-navbar .user-avatar-badge {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+}
+
+/* ===== Seletor de cor (no perfil) ===== */
+.mf-navbar .profile-color {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  outline: none;
+  padding: 0;
+}
+
+.mf-navbar .profile-color[data-color="blue"] { background: #3b82f6; }
+.mf-navbar .profile-color[data-color="purple"] { background: #8b5cf6; }
+.mf-navbar .profile-color[data-color="yellow"] { background: #f59e0b; }
+.mf-navbar .profile-color[data-color="red"] { background: #ef4444; }
+
+.mf-navbar .profile-color.active {
+  border-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.18);
+}

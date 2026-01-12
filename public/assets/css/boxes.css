@@ -1,0 +1,20 @@
+/* assets/css/boxes.css */
+body { padding-top: 115px; }
+
+.box-card {
+  border: 0;
+  border-radius: 14px;
+}
+
+.box-card .box-title {
+  font-weight: 700;
+}
+
+.box-card .box-value {
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.box-actions .btn {
+  border-radius: 10px;
+}

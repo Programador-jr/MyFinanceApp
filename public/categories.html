@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-br" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MyFinance - Categorias</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+   <link href="assets/css/navbar.css" rel="stylesheet" />
+  <link href="assets/css/categories.css" rel="stylesheet" />
+</head>
+
+<body>
+  <!-- NAVBAR -->
+  <div id="loadNavbar"></div>
+
+
+  <!-- ALERT CONTAINER -->
+  <div
+    id="alert-container"
+    class="position-fixed top-0 start-50 translate-middle-x mt-3"
+    style="z-index: 1055; width: 90%; max-width: 420px;"
+  ></div>
+
+  <!-- INVITE CODE MODAL (reuso do padrão) -->
+  <div class="modal fade" id="inviteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h6 class="modal-title">
+            <i class="fa-solid fa-people-roof"></i> Código da família
+          </h6>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="mb-2">
+            <label class="form-label small">Código</label>
+            <input id="inviteCodeInput" class="form-control invite-code-input" readonly />
+          </div>
+
+          <div class="d-flex gap-2">
+            <button id="copyInviteBtn" class="btn btn-outline-primary w-100" type="button">
+              <i class="fa-regular fa-copy"></i> Copiar
+            </button>
+            <button id="regenInviteBtn" class="btn btn-outline-danger w-100" type="button">
+              <i class="fa-solid fa-rotate"></i> Gerar novo
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CONFIRMAR LOGOUT -->
+  <div class="modal fade" id="logoutConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="fa-solid fa-right-from-bracket text-danger me-2"></i> Confirmar saída
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <p>Tem certeza que deseja sair do MyFinance?</p>
+          <p class="text-muted small">Você será desconectado e redirecionado para a página de login.</p>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-success" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-danger" id="confirmLogout">Sair</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTEÚDO -->
+  <div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h3 class="mb-0">
+        <i class="fa-solid fa-tags"></i> Categorias
+      </h3>
+
+      <button class="btn btn-primary" id="openCreateCategoryBtn" type="button">
+        <i class="fa-solid fa-plus me-1"></i> Nova categoria
+      </button>
+    </div>
+
+    <div class="card p-4 shadow-sm">
+      <div class="table-responsive">
+        <table class="table table-striped align-middle">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Tipo</th>
+              <th>Origem</th>
+              <th class="text-end">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="categoriesTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CRIAR/EDITAR CATEGORIA -->
+  <div class="modal fade" id="categoryEditorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="fa-solid fa-tags text-primary me-2"></i>
+            <span id="categoryEditorTitle">Nova categoria</span>
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Nome</label>
+            <input type="text" class="form-control" id="categoryNameInput" placeholder="Ex: Alimentação" />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Tipo</label>
+            <select class="form-select" id="categoryTypeSelect">
+              <option value="income">Entrada</option>
+              <option value="expense">Saída</option>
+            </select>
+          </div>
+
+          <div class="small text-muted" id="categoryEditorHint" style="display:none;">
+            Categorias do sistema não podem ser editadas.
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-success" id="saveCategoryEditBtn">
+            <i class="fa-solid fa-check me-2"></i> Salvar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CONFIRMAR EXCLUSÃO -->
+  <div class="modal fade" id="deleteCategoryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="fa-solid fa-triangle-exclamation text-danger me-2"></i> Confirmar exclusão
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <p>Tem certeza que deseja excluir esta categoria?</p>
+          <p class="text-muted small">Esta ação não pode ser desfeita.</p>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-danger" id="confirmDeleteCategoryBtn">Excluir</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPTS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/categories.js"></script>
+  <script src="js/loadNavbar.js"></script>
+  <script src="js/profileMenu.js"></script>
+</body>
+</html>

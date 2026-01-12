@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-br" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <title>MyFinance | Dashboard</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <!-- seu theme.css já existente -->
+  <link href="assets/css/navbar.css" rel="stylesheet">
+  <link href="assets/css/dashboard.css" rel="stylesheet">
+
+  <style>
+    body { padding-top: 115px!important; }
+    .chart-wrap { position: relative; min-height: 260px; }
+    .invite-code-input { font-family: monospace; letter-spacing: 1px; }
+  </style>
+</head>
+
+<body>
+
+<!-- NAVBAR FIXA -->
+<div id="loadNavbar"></div>
+
+<!-- ALERT CONTAINER -->
+<div id="alert-container"
+     class="position-fixed top-0 start-50 translate-middle-x mt-3"
+     style="z-index: 1055; width: 90%; max-width: 420px;">
+</div>
+
+<!-- INVITE CODE MODAL -->
+<div class="modal fade" id="inviteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title"><i class="fa-solid fa-people-roof"></i> Código da família</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="mb-2">
+          <label class="form-label small">Código</label>
+          <input id="inviteCodeInput" class="form-control invite-code-input" readonly>
+        </div>
+
+        <div class="d-flex gap-2">
+          <button id="copyInviteBtn" class="btn btn-outline-primary w-100">
+            <i class="fa-regular fa-copy"></i> Copiar
+          </button>
+          <button id="regenInviteBtn" class="btn btn-outline-danger w-100">
+            <i class="fa-solid fa-rotate"></i> Gerar novo
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de confirmação de logout -->
+<div class="modal fade" id="logoutConfirmModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fa-solid fa-right-from-bracket text-danger me-2"></i>
+          Confirmar saída
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Tem certeza que deseja sair do MyFinance?</p>
+        <p class="text-muted small">Você será desconectado e redirecionado para a página de login.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-success" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" id="confirmLogout">Sair</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- CONTEÚDO -->
+<div class="container">
+
+  <!-- RESUMO -->
+  <div class="row mb-4">
+    <div class="col-md-4">
+      <div class="card p-3 shadow-sm">
+        <h6>Entrou</h6>
+        <h4 id="income" class="value-positive">R$ 0,00</h4>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card p-3 shadow-sm">
+        <h6>Saiu</h6>
+        <h4 id="expense" class="value-negative">R$ 0,00</h4>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card p-3 shadow-sm">
+        <h6>Saldo</h6>
+        <h4 id="balance">R$ 0,00</h4>
+      </div>
+    </div>
+  </div>
+
+  <!-- CAIXINHAS -->
+<div class="row mb-4">
+    <div class="col-12 d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0">💰 Caixinhas</h5>
+        <a href="boxes.html" class="btn btn-sm btn-outline-primary">
+            <i class="fa-solid fa-plus me-1"></i> Nova Caixinha
+        </a>
+    </div>
+    <div id="boxes" class="row">
+        <!-- O conteúdo será carregado via JavaScript -->
+    </div>
+    <div id="emptyBoxes" class="d-none text-center py-5">
+        <i class="fa-solid fa-piggy-bank fa-3x mb-3 text-muted"></i>
+        <h6 class="text-muted">Nenhuma caixinha criada</h6>
+        <p class="small text-muted">Crie sua primeira caixinha para organizar suas finanças</p>
+        <a href="boxes.html" class="btn btn-primary mt-2">
+            <i class="fa-solid fa-plus me-1"></i> Criar Caixinha
+        </a>
+    </div>
+</div>
+
+  <!-- FILTROS E GRÁFICOS -->
+  <div class="row mt-4">
+    <div class="col-12 mb-3">
+      <div class="row g-2">
+        <div class="col-sm-6 col-md-3">
+          <select id="month" class="form-select"></select>
+        </div>
+
+        <div class="col-sm-6 col-md-3">
+          <select id="year" class="form-select"></select>
+        </div>
+
+        <div class="col-sm-6 col-md-3">
+          <button class="btn btn-primary w-100" id="filterBtn">Filtrar</button>
+        </div>
+
+        <div class="col-sm-6 col-md-3 d-flex align-items-center">
+          <small class="text-muted">Filtros aplicados ao mês corrente</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6 mb-3">
+      <div class="card p-3 shadow-sm h-100">
+        <h6 class="mb-3">Entradas x Saídas</h6>
+        <div class="chart-wrap" style="height: 300px;">
+          <canvas id="incomeExpenseChart"></canvas>
+          <div id="incomeExpenseEmpty" class="chart-placeholder d-none">Sem dados para o período selecionado</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6 mb-3">
+      <div class="card p-3 shadow-sm h-100">
+        <h6 class="mb-3">Despesas por Categoria</h6>
+        <div class="chart-wrap" style="height: 300px;">
+          <canvas id="expenseCategoryChart"></canvas>
+          <div id="expenseCategoryEmpty" class="chart-placeholder d-none">Sem dados para o período selecionado</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTÃO mostrar análise avançada -->
+  <div class="mb-4">
+    <button id="toggleAdvancedBtn" class="btn btn-outline-secondary">
+      <i class="fa-solid fa-wand-magic-sparkles"></i> Mostrar análise avançada
+    </button>
+  </div>
+
+  <!-- ANÁLISE AVANÇADA (COLLAPSE - render só quando aberto) -->
+  <div id="advancedContainer" class="collapse">
+    <!-- o conteúdo é o que você já tem: mantenho estrutura, mas oculto até o usuário abrir -->
+    <div class="card p-4 shadow-sm mb-5">
+      <h5 class="mb-4">
+        <i class="fa-solid fa-scale-balanced"></i> Comparação Avançada
+      </h5>
+
+      <div class="row g-3 mb-4">
+        <div class="col-md-3">
+          <label class="form-label">Data inicial</label>
+          <input type="date" id="startDate" class="form-control">
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Data final</label>
+          <input type="date" id="endDate" class="form-control">
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Métrica</label>
+          <select id="metricType" class="form-select">
+            <option value="expense">Saída</option>
+            <option value="income">Entrada</option>
+            <option value="balance">Saldo</option>
+          </select>
+        </div>
+
+        <div class="col-md-3 d-flex align-items-end">
+          <button class="btn btn-primary w-100" id="compareBtn">Comparar</button>
+        </div>
+      </div>
+
+      <div classs="card p-3 shadow-sm" style="height: 300px;">
+      <canvas id="advancedComparisonChart"></canvas>
+      </div>
+      <div id="comparisonBadge" class="mt-3 text-center fw-bold"></div>
+
+      <div id="alerts" class="mt-4"></div>
+
+      <div class="row mt-4">
+        <div class="col-md-6">
+          <h6>📈 Categorias que mais cresceram</h6>
+          <ul id="topUp" class="list-group"></ul>
+        </div>
+        <div class="col-md-6">
+          <h6>📉 Categorias que mais caíram</h6>
+          <ul id="topDown" class="list-group"></ul>
+        </div>
+      </div>
+
+      <div class="mt-4">
+        <h6>Comparação Detalhada</h6>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Categoria</th>
+              <th>Valor</th>
+              <th>Variação</th>
+            </tr>
+          </thead>
+          <tbody id="comparisonTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div> <!-- /container -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/api.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/auth.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script src="js/charts.js"></script>
+<script src="js/loadNavbar.js"></script>
+<script src="js/profileMenu.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/advancedComparison.js"></script>
+</body>
+</html>
