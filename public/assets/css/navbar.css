@@ -99,9 +99,13 @@
 
 /* Dropdown menu */
 .mf-navbar .dropdown-menu {
-  min-width: 220px;
+  min-width: 220px!important;
   border-radius: 12px;
   overflow: hidden;
+}
+
+.user-menu {
+  left: -135px!important;
 }
 
 /* melhora contraste do dropdown no dark/light */
@@ -132,27 +136,6 @@
   border-color: rgba(255, 255, 255, 0.35);
   border-radius: 10px;
   padding: 0.4rem 0.6rem;
-}
-
-/* ===== Mobile ===== */
-@media (max-width: 576px) {
-  .mf-navbar {
-    padding: 0.6rem 0;
-  }
-
-  .mf-navbar .navbar-brand {
-    font-size: 1.3rem;
-  }
-
-  .mf-navbar .btn.btn-sm {
-    padding: 0.52rem 0.75rem;
-    font-size: 0.95rem;
-  }
-
-  .mf-navbar .navbar-nav .nav-link {
-    margin: 3px 0;
-    padding: 0.65rem 0.9rem !important;
-  }
 }
 
 /* ===== Avatar ===== */

@@ -52,7 +52,7 @@ function pickInitial(name) {
 function colorHex(color) {
   const map = {
     blue: "#3b82f6",
-    purple: "#8b5cf6",
+    purple: "#4a24a3",
     yellow: "#f59e0b",
     red: "#ef4444",
   };
@@ -61,7 +61,6 @@ function colorHex(color) {
 
 function ensureDefaultProfileName() {
   const prefs = getProfile();
-
   if (prefs.name && prefs.name.trim()) return;
 
   const user = getLoggedUser();
@@ -97,7 +96,14 @@ function applyProfileToNavbar() {
   fallback.style.background = c;
   badge.style.background = c;
 
-  if (prefs.avatarDataUrl) {
+  // Preferência: avatar vindo do backend (avatarUrl)
+  // Fallback: avatar antigo em base64 (avatarDataUrl)
+  const apiBase = window.__API_URL__ || "http://localhost:3000";
+  if (prefs.avatarUrl) {
+    img.src = apiBase + prefs.avatarUrl;
+    img.classList.remove("d-none");
+    fallback.classList.add("d-none");
+  } else if (prefs.avatarDataUrl) {
     img.src = prefs.avatarDataUrl;
     img.classList.remove("d-none");
     fallback.classList.add("d-none");
@@ -181,23 +187,39 @@ function bindProfileMenu() {
     openModalSafely(document.getElementById("editAvatarModal"));
   });
 
-  saveNameBtn.addEventListener("click", () => {
+saveNameBtn.addEventListener("click", async () => {
+  const newName = nameInput.value.trim() || "Usuário";
+
+  try {
+    const data = await apiFetch("/users/me", "PATCH", { name: newName });
+
     const prefs = getProfile();
-    prefs.name = nameInput.value.trim() || "Usuário";
+    prefs.name = data.user?.name || newName;
     if (!prefs.color) prefs.color = "blue";
     setProfile(prefs);
+
+    const u = getLoggedUser() || {};
+    u.name = data.user?.name || newName;
+    localStorage.setItem("user", JSON.stringify(u));
 
     const modal = bootstrap.Modal.getInstance(document.getElementById("editNameModal"));
     if (modal) modal.hide();
 
     applyProfileToNavbar();
-    if (typeof showAlert === "function") showAlert("Nome atualizado", "success", "check-circle");
-  });
+    if (typeof showAlert === "function")
+      showAlert("Nome atualizado", "success", "check-circle");
+  } catch (err) {
+    // apiFetch já mostra alerta de erro
+  }
+});
 
-  avatarInput.addEventListener("change", (e) => {
+
+  // Upload REAL do avatar para o backend
+  avatarInput.addEventListener("change", async (e) => {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
 
+    // Sugestão: manter seu aviso (1MB), mas o backend pode aceitar mais.
     if (file.size > 1024 * 1024) {
       if (typeof showAlert === "function")
         showAlert("Imagem muito grande (máx. 1MB)", "warning", "triangle-exclamation");
@@ -205,18 +227,31 @@ function bindProfileMenu() {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
+    try {
+      const fd = new FormData();
+      fd.append("avatar", file); // nome do campo esperado no backend [web:95]
+
+      // Requer api.js atualizado para não forçar Content-Type application/json em FormData
+      const data = await apiFetch("/users/me/avatar", { method: "PATCH", body: fd });
+
       const prefs = getProfile();
-      prefs.avatarDataUrl = reader.result;
+      prefs.avatarUrl = data?.avatarUrl || null;
+      delete prefs.avatarDataUrl; // remove base64 local
       if (!prefs.color) prefs.color = "blue";
       setProfile(prefs);
 
       applyProfileToNavbar();
+
+      const modal = bootstrap.Modal.getInstance(document.getElementById("editAvatarModal"));
+      if (modal) modal.hide();
+
       if (typeof showAlert === "function")
         showAlert("Avatar atualizado", "success", "check-circle");
-    };
-    reader.readAsDataURL(file);
+    } catch (err) {
+      // apiFetch já trata e exibe alerta quando vem erro do backend
+    } finally {
+      avatarInput.value = "";
+    }
   });
 
   colorBtns.forEach((btn) => {

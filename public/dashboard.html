@@ -2,19 +2,13 @@
 <html lang="pt-br" data-bs-theme="dark">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MyFinance | Dashboard</title>
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <!-- seu theme.css já existente -->
   <link href="assets/css/navbar.css" rel="stylesheet">
   <link href="assets/css/dashboard.css" rel="stylesheet">
-
-  <style>
-    body { padding-top: 115px!important; }
-    .chart-wrap { position: relative; min-height: 260px; }
-    .invite-code-input { font-family: monospace; letter-spacing: 1px; }
-  </style>
 </head>
 
 <body>
@@ -44,10 +38,10 @@
         </div>
 
         <div class="d-flex gap-2">
-          <button id="copyInviteBtn" class="btn btn-outline-primary w-100">
+          <button id="copyInviteBtn" class="btn btn-outline-primary ">
             <i class="fa-regular fa-copy"></i> Copiar
           </button>
-          <button id="regenInviteBtn" class="btn btn-outline-danger w-100">
+          <button id="regenInviteBtn" class="btn btn-outline-danger ">
             <i class="fa-solid fa-rotate"></i> Gerar novo
           </button>
         </div>
@@ -78,90 +72,95 @@
     </div>
   </div>
 </div>
+
 <!-- CONTEÚDO -->
-<div class="container">
+<div class="container-xxl py-3 py-md-4">
 
   <!-- RESUMO -->
-  <div class="row mb-4">
-    <div class="col-md-4">
-      <div class="card p-3 shadow-sm">
-        <h6>Entrou</h6>
-        <h4 id="income" class="value-positive">R$ 0,00</h4>
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-md-4">
+      <div class="alert alert-success p-4 p-md-3 shadow-sm h-100">
+        <i class="fa-solid fa-arrow-down-long me-2"></i> Entrada
+        <div id="income" class="value-positive fs-4 fw-semibold">R$ 0,00</div>
       </div>
     </div>
 
-    <div class="col-md-4">
-      <div class="card p-3 shadow-sm">
-        <h6>Saiu</h6>
-        <h4 id="expense" class="value-negative">R$ 0,00</h4>
+    <div class="col-12 col-md-4">
+      <div class="alert alert-danger p-4 p-md-3 shadow-sm h-100">
+        <i class="fa-solid fa-arrow-up-long me-2"></i> Saída
+        <div id="expense" class="value-negative fs-4 fw-semibold">R$ 0,00</div>
       </div>
     </div>
 
-    <div class="col-md-4">
-      <div class="card p-3 shadow-sm">
-        <h6>Saldo</h6>
-        <h4 id="balance">R$ 0,00</h4>
+    <div class="col-12 col-md-4">
+      <div class="alert alert-secondary p-4 p-md-3 shadow-sm h-100">
+        <i class="fa-solid fa-scale-balanced me-2"></i> Saldo
+        <div id="balance" class="fs-4 fw-semibold">R$ 0,00</div>
       </div>
     </div>
   </div>
 
   <!-- CAIXINHAS -->
-<div class="row mb-4">
-    <div class="col-12 d-flex justify-content-between align-items-center mb-3">
-        <h5 class="mb-0">💰 Caixinhas</h5>
-        <a href="boxes.html" class="btn btn-sm btn-outline-primary">
-            <i class="fa-solid fa-plus me-1"></i> Nova Caixinha
-        </a>
+  <div class="row mb-4">
+    <div class="col-12 d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3">
+      <h5 class="mb-0"><i class="fa-solid fa-piggy-bank me-2"></i> Caixinhas</h5>
+
+      <!-- no mobile: botão grande e fácil de clicar -->
+      <a href="boxes.html" class="btn btn-outline-primary  w-sm-auto">
+        <i class="fa-solid fa-plus me-1"></i> Nova Caixinha
+      </a>
     </div>
-    <div id="boxes" class="row">
-        <!-- O conteúdo será carregado via JavaScript -->
+
+    <div id="boxes" class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3">
+      <!-- O conteúdo será carregado via JavaScript -->
     </div>
+
     <div id="emptyBoxes" class="d-none text-center py-5">
-        <i class="fa-solid fa-piggy-bank fa-3x mb-3 text-muted"></i>
-        <h6 class="text-muted">Nenhuma caixinha criada</h6>
-        <p class="small text-muted">Crie sua primeira caixinha para organizar suas finanças</p>
-        <a href="boxes.html" class="btn btn-primary mt-2">
-            <i class="fa-solid fa-plus me-1"></i> Criar Caixinha
-        </a>
+      <i class="fa-solid fa-piggy-bank fa-3x mb-3 text-muted"></i>
+      <h6 class="text-muted">Nenhuma caixinha criada</h6>
+      <p class="small text-muted">Crie sua primeira caixinha para organizar suas finanças</p>
+      <a href="boxes.html" class="btn btn-primary mt-2  w-sm-auto">
+        <i class="fa-solid fa-plus me-1"></i> Criar Caixinha
+      </a>
     </div>
-</div>
+  </div>
 
   <!-- FILTROS E GRÁFICOS -->
   <div class="row mt-4">
     <div class="col-12 mb-3">
       <div class="row g-2">
-        <div class="col-sm-6 col-md-3">
+        <div class="col-12 col-sm-3 col-md-3">
           <select id="month" class="form-select"></select>
         </div>
 
-        <div class="col-sm-6 col-md-3">
+        <div class="col-12 col-sm-3 col-md-3">
           <select id="year" class="form-select"></select>
         </div>
 
-        <div class="col-sm-6 col-md-3">
-          <button class="btn btn-primary w-100" id="filterBtn">Filtrar</button>
+        <div class="col-12 col-sm-3 col-md-3">
+          <button class="btn btn-primary " id="filterBtn">Filtrar <i class="fa-solid fa-filter-circle-dollar"></i></button> 
         </div>
 
-        <div class="col-sm-6 col-md-3 d-flex align-items-center">
-          <small class="text-muted">Filtros aplicados ao mês corrente</small>
+        <div class="col-12 col-sm-6 col-md-3 d-flex align-items-center">
+          <small class="text-muted d-none d-md-block">Filtros aplicados ao mês corrente</small>
         </div>
       </div>
     </div>
 
-    <div class="col-lg-6 mb-3">
-      <div class="card p-3 shadow-sm h-100">
+    <div class="col-12 col-lg-6 mb-3">
+      <div class="card p-4 p-md-3 shadow-sm h-100">
         <h6 class="mb-3">Entradas x Saídas</h6>
-        <div class="chart-wrap" style="height: 300px;">
+        <div class="chart-wrap" style="height: 320px;">
           <canvas id="incomeExpenseChart"></canvas>
           <div id="incomeExpenseEmpty" class="chart-placeholder d-none">Sem dados para o período selecionado</div>
         </div>
       </div>
     </div>
 
-    <div class="col-lg-6 mb-3">
-      <div class="card p-3 shadow-sm h-100">
+    <div class="col-12 col-lg-6 mb-3">
+      <div class="card p-4 p-md-3 shadow-sm h-100">
         <h6 class="mb-3">Despesas por Categoria</h6>
-        <div class="chart-wrap" style="height: 300px;">
+        <div class="chart-wrap" style="height: 320px;">
           <canvas id="expenseCategoryChart"></canvas>
           <div id="expenseCategoryEmpty" class="chart-placeholder d-none">Sem dados para o período selecionado</div>
         </div>
@@ -171,31 +170,30 @@
 
   <!-- BOTÃO mostrar análise avançada -->
   <div class="mb-4">
-    <button id="toggleAdvancedBtn" class="btn btn-outline-secondary">
+    <button id="toggleAdvancedBtn" class="btn btn-outline-secondary  w-sm-auto">
       <i class="fa-solid fa-wand-magic-sparkles"></i> Mostrar análise avançada
     </button>
   </div>
 
-  <!-- ANÁLISE AVANÇADA (COLLAPSE - render só quando aberto) -->
+  <!-- ANÁLISE AVANÇADA -->
   <div id="advancedContainer" class="collapse">
-    <!-- o conteúdo é o que você já tem: mantenho estrutura, mas oculto até o usuário abrir -->
     <div class="card p-4 shadow-sm mb-5">
       <h5 class="mb-4">
         <i class="fa-solid fa-scale-balanced"></i> Comparação Avançada
       </h5>
 
       <div class="row g-3 mb-4">
-        <div class="col-md-3">
+        <div class="col-12 col-md-3">
           <label class="form-label">Data inicial</label>
           <input type="date" id="startDate" class="form-control">
         </div>
 
-        <div class="col-md-3">
+        <div class="col-12 col-md-3">
           <label class="form-label">Data final</label>
           <input type="date" id="endDate" class="form-control">
         </div>
 
-        <div class="col-md-3">
+        <div class="col-12 col-md-3">
           <label class="form-label">Métrica</label>
           <select id="metricType" class="form-select">
             <option value="expense">Saída</option>
@@ -204,24 +202,24 @@
           </select>
         </div>
 
-        <div class="col-md-3 d-flex align-items-end">
-          <button class="btn btn-primary w-100" id="compareBtn">Comparar</button>
+        <div class="col-12 col-md-3 d-flex align-items-end">
+          <button class="btn btn-primary " id="compareBtn">Comparar</button>
         </div>
       </div>
 
-      <div classs="card p-3 shadow-sm" style="height: 300px;">
-      <canvas id="advancedComparisonChart"></canvas>
+      <div class="card p-3 shadow-sm" style="height: 320px;">
+        <canvas id="advancedComparisonChart"></canvas>
       </div>
-      <div id="comparisonBadge" class="mt-3 text-center fw-bold"></div>
 
+      <div id="comparisonBadge" class="mt-3 text-center fw-bold"></div>
       <div id="alerts" class="mt-4"></div>
 
-      <div class="row mt-4">
-        <div class="col-md-6">
+      <div class="row mt-4 g-3">
+        <div class="col-12 col-md-6">
           <h6>📈 Categorias que mais cresceram</h6>
           <ul id="topUp" class="list-group"></ul>
         </div>
-        <div class="col-md-6">
+        <div class="col-12 col-md-6">
           <h6>📉 Categorias que mais caíram</h6>
           <ul id="topDown" class="list-group"></ul>
         </div>
@@ -229,21 +227,24 @@
 
       <div class="mt-4">
         <h6>Comparação Detalhada</h6>
-        <table class="table table-striped">
-          <thead>
-            <tr>
-              <th>Categoria</th>
-              <th>Valor</th>
-              <th>Variação</th>
-            </tr>
-          </thead>
-          <tbody id="comparisonTable"></tbody>
-        </table>
+        <div class="table-responsive">
+          <table class="table table-striped mb-0">
+            <thead>
+              <tr>
+                <th>Categoria</th>
+                <th>Valor</th>
+                <th>Variação</th>
+              </tr>
+            </thead>
+            <tbody id="comparisonTable"></tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
 
-</div> <!-- /container -->
+</div><!-- /container -->
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 <script src="js/api.js"></script>
 <script src="js/utils.js"></script>

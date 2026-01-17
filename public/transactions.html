@@ -12,43 +12,13 @@
 </head>
 
 <body>
-<div id="loadNavbar"></div>
+  <div id="loadNavbar"></div>
 
   <div
     id="alert-container"
     class="position-fixed top-0 start-50 translate-middle-x mt-3"
     style="z-index: 1055; width: 90%; max-width: 420px;"
   ></div>
-
-  <!-- INVITE CODE MODAL -->
-  <div class="modal fade" id="inviteModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-sm modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h6 class="modal-title">
-            <i class="fa-solid fa-people-roof"></i> Código da família
-          </h6>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-
-        <div class="modal-body">
-          <div class="mb-2">
-            <label class="form-label small">Código</label>
-            <input id="inviteCodeInput" class="form-control invite-code-input" readonly />
-          </div>
-
-          <div class="d-flex gap-2">
-            <button id="copyInviteBtn" class="btn btn-outline-primary w-100" type="button">
-              <i class="fa-regular fa-copy"></i> Copiar
-            </button>
-            <button id="regenInviteBtn" class="btn btn-outline-danger w-100" type="button">
-              <i class="fa-solid fa-rotate"></i> Gerar novo
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <!-- MODAL CONFIRMAR LOGOUT -->
   <div class="modal fade" id="logoutConfirmModal" tabindex="-1" aria-hidden="true">
@@ -74,14 +44,14 @@
     </div>
   </div>
 
-  <div class="container mt-4">
+  <div class="container-xxl py-3 py-md-4">
     <h3 class="mb-4">
       <i class="fa-solid fa-list"></i> Lançamentos
     </h3>
 
     <div class="card p-4 mb-4 shadow-sm">
       <form id="transactionForm" class="row g-3">
-        <div class="col-md-3">
+        <div class="col-12 col-md-3">
           <label class="form-label">Tipo</label>
           <select class="form-select" id="type" required>
             <option value="income">Entrada</option>
@@ -89,23 +59,23 @@
           </select>
         </div>
 
-        <div class="col-md-3">
+        <div class="col-12 col-md-3">
           <label class="form-label">Valor</label>
           <input type="number" step="0.01" class="form-control" id="value" required />
         </div>
 
-        <div class="col-md-3">
+        <div class="col-12 col-md-3">
           <label class="form-label">Categoria</label>
           <select class="form-select" id="category" required></select>
         </div>
 
-        <div class="col-md-3 d-flex align-items-end">
-          <button type="button" class="btn btn-outline-primary w-100" id="openCategoryBtn">
+        <div class="col-12 col-md-3 d-flex align-items-end">
+          <button type="button" class="btn btn-outline-primary " id="openCategoryBtn">
             Nova Categoria
           </button>
         </div>
 
-        <div class="col-md-3">
+        <div class="col-12 col-md-3">
           <label class="form-label">Grupo</label>
           <select class="form-select" id="group" required>
             <option value="fixed">Fixo</option>
@@ -115,42 +85,42 @@
           </select>
         </div>
 
-        <div class="col-md-3">
+        <div class="col-12 col-md-3">
           <label class="form-label">Data</label>
           <input type="date" class="form-control" id="date" required />
         </div>
 
-        <div class="col-md-12 text-end">
-          <button class="btn btn-success" type="submit">
+        <div class="col-12 text-end">
+          <button class="btn-outline-success btn-success  w-sm-auto" type="submit">
             <i class="fa-solid fa-plus"></i> Salvar
           </button>
         </div>
       </form>
     </div>
 
-    <div class="row mb-3">
-      <div class="col-md-3">
+    <div class="row g-3 mb-3">
+      <div class="col-12 col-md-3">
         <input type="month" class="form-control" id="monthFilter" />
       </div>
     </div>
 
-    <div class="row mb-4">
-      <div class="col-md-4">
-        <div class="alert alert-success shadow-soft">
-          <i class="fa-solid fa-arrow-down-to-line me-2"></i> Entrada
+    <div class="row g-3 mb-4">
+      <div class="col-12 col-md-4">
+        <div class="alert alert-success shadow-soft h-100">
+          <i class="fa-solid fa-arrow-down-long me-2"></i> Entrada
           <strong id="monthIncome" class="d-block mt-1 fs-5">R$ 0,00</strong>
         </div>
       </div>
 
-      <div class="col-md-4">
-        <div class="alert alert-danger shadow-soft">
-          <i class="fa-solid fa-arrow-up-from-line me-2"></i> Saída
+      <div class="col-12 col-md-4">
+        <div class="alert alert-danger shadow-soft h-100">
+          <i class="fa-solid fa-arrow-up-long me-2"></i> Saída
           <strong id="monthExpense" class="d-block mt-1 fs-5">R$ 0,00</strong>
         </div>
       </div>
 
-      <div class="col-md-4">
-        <div class="alert alert-secondary shadow-soft">
+      <div class="col-12 col-md-4">
+        <div class="alert alert-secondary shadow-soft h-100">
           <i class="fa-solid fa-scale-balanced me-2"></i> Saldo
           <strong id="monthBalance" class="d-block mt-1 fs-5">R$ 0,00</strong>
         </div>
@@ -160,19 +130,21 @@
     <div class="card p-4 shadow-sm">
       <h5>Histórico</h5>
 
-      <table class="table table-striped mt-3">
-        <thead>
-          <tr>
-            <th>Data</th>
-            <th>Tipo</th>
-            <th>Categoria</th>
-            <th>Grupo</th>
-            <th>Valor</th>
-            <th>Ações</th>
-          </tr>
-        </thead>
-        <tbody id="transactionsTable"></tbody>
-      </table>
+      <div class="table-responsive">
+        <table class="table table-striped mt-3 mb-0">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Tipo</th>
+              <th>Categoria</th>
+              <th>Grupo</th>
+              <th>Valor</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="transactionsTable"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 
