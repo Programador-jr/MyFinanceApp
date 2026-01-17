@@ -60,7 +60,7 @@
             <span class="d-none d-sm-inline">Tema</span>
           </button>
 
-          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="themeBtn">
+          <ul class="dropdown-menu dropdown-menu" aria-labelledby="themeBtn">
             <li>
               <button class="dropdown-item theme-option" data-theme="system" type="button">
                 <i class="fa-solid fa-display me-2"></i>Sistema
@@ -105,7 +105,7 @@
             <span id="userAvatarFallback" class="user-avatar-fallback">U</span>
           </button>
 
-          <ul class="dropdown-menu dropdown-menu-end p-2" aria-labelledby="userMenuBtn" style="min-width: 280px;">
+          <ul class="user-menu dropdown-menu dropdown-menu-end p-2" aria-labelledby="userMenuBtn" style="min-width: 280px;">
             <li class="px-2 py-2">
               <div class="d-flex align-items-center gap-2">
                 <div class="user-avatar-badge" id="userAvatarBadge"></div>
@@ -142,7 +142,7 @@
 
             <li class="px-2">
               <button
-                class="btn btn-sm btn-danger w-100"
+                class="btn btn-sm btn-danger"
                 data-bs-toggle="modal"
                 data-bs-target="#logoutConfirmModal"
                 type="button"
@@ -223,10 +223,10 @@
         </div>
 
         <div class="d-flex gap-2">
-          <button id="copyInviteBtn" class="btn btn-outline-primary w-100" type="button">
+          <button id="copyInviteBtn" class="btn btn-outline-primary" type="button">
             <i class="fa-regular fa-copy"></i> Copiar
           </button>
-          <button id="regenInviteBtn" class="btn btn-outline-danger w-100" type="button">
+          <button id="regenInviteBtn" class="btn btn-outline-danger" type="button">
             <i class="fa-solid fa-rotate"></i> Gerar novo
           </button>
         </div>

@@ -5,8 +5,9 @@
  * API CLIENT (frontend)
  * - Adiciona Authorization automaticamente (Bearer token)
  * - Suporta dois formatos:
- *   1) apiFetch("/x", { method, headers, body: "..." })
+ *   1) apiFetch("/x", { method, headers, body })
  *   2) apiFetch("/x", "POST", { ...obj })
+ * - Suporta upload com FormData (não seta Content-Type)
  * - Trata 401 (token expirado/inválido): faz logout e redireciona
  * =========================================================
  */
@@ -17,13 +18,24 @@ function getToken() {
   return localStorage.getItem("token");
 }
 
+function isFormDataBody(value) {
+  return typeof FormData !== "undefined" && value instanceof FormData;
+}
+
 async function apiFetch(url, methodOrOptions = "GET", body = null) {
   const token = getToken();
 
-  // Headers base
+  // Descobre se é FormData (upload)
+  const formDataRequest =
+    isFormDataBody(body) ||
+    (typeof methodOrOptions === "object" && isFormDataBody(methodOrOptions.body));
+
+  // Headers base:
+  // - JSON: seta Content-Type application/json
+  // - FormData: NÃO seta Content-Type (browser adiciona boundary automaticamente)
   const baseHeaders = {
-    "Content-Type": "application/json",
-    ...(token && { Authorization: `Bearer ${token}` })
+    ...(token && { Authorization: `Bearer ${token}` }),
+    ...(formDataRequest ? {} : { "Content-Type": "application/json" }),
   };
 
   let options = { headers: baseHeaders };
@@ -34,16 +46,15 @@ async function apiFetch(url, methodOrOptions = "GET", body = null) {
       ...methodOrOptions,
       headers: {
         ...baseHeaders,
-        ...(methodOrOptions.headers || {})
-      }
+        ...(methodOrOptions.headers || {}),
+      },
     };
   } else {
-    // Formato novo: apiFetch(url, "POST", bodyObj)
+    // Formato novo: apiFetch(url, "POST", body)
     options.method = methodOrOptions;
 
-    // Aceita body como objeto (recomendado)
     if (body !== null && body !== undefined) {
-      options.body = JSON.stringify(body);
+      options.body = formDataRequest ? body : JSON.stringify(body);
     }
   }
 

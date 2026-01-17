@@ -78,6 +78,32 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user || null));
 
+      // =========================
+      // SYNC PROFILE PREFS (nome/avatar) para o navbar
+      // - O profileMenu.js lê de profilePrefs:<userId>
+      // =========================
+      if (data.user?.id) {
+        const key = `profilePrefs:${data.user.id}`;
+        let prefs = {};
+        try {
+          prefs = JSON.parse(localStorage.getItem(key) || "{}");
+        } catch {
+          prefs = {};
+        }
+
+        // mantém cor anterior se existir
+        if (!prefs.color) prefs.color = "blue";
+
+        // sincroniza do backend
+        if (data.user.name) prefs.name = data.user.name;
+        prefs.avatarUrl = data.user.avatarUrl || null;
+
+        // se existir base64 antigo, remove para priorizar backend
+        if (prefs.avatarUrl) delete prefs.avatarDataUrl;
+
+        localStorage.setItem(key, JSON.stringify(prefs));
+      }
+
       const isRemembered = rememberCheckbox?.classList.contains("checked");
       if (isRemembered) localStorage.setItem("rememberedEmail", email);
       else localStorage.removeItem("rememberedEmail");

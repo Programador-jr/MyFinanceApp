@@ -264,7 +264,7 @@ if (document.readyState === "complete" || document.readyState === "interactive")
 function getAppColorPalette(color) {
   const palettes = {
     blue: { hex: "#0d6efd", rgb: "13,110,253" },
-    purple: { hex: "#8b5cf6", rgb: "139,92,246" },
+    purple: { hex: "#4a24a3", rgb: "139,92,246" },
     yellow: { hex: "#f59e0b", rgb: "245,158,11" },
     red: { hex: "#ef4444", rgb: "239,68,68" },
   };
