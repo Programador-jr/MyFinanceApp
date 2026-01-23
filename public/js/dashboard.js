@@ -10,7 +10,6 @@ document.addEventListener("DOMContentLoaded", () => {
   bindInviteModal();
 });
 
-
 /* ===============================
    FILTROS
 ================================ */
@@ -46,7 +45,8 @@ function initFilter() {
 }
 
 function applyDefaultFilter() {
-  const [year, month] = [document.getElementById("year").value, document.getElementById("month").value];
+  const year = document.getElementById("year").value;
+  const month = document.getElementById("month").value;
   loadSummary(month, year);
   loadCharts(month, year);
 }
@@ -68,7 +68,7 @@ async function loadSummary(month, year) {
     const boxes = document.getElementById("boxes");
     boxes.innerHTML = "";
 
-    (data.boxes || []).forEach(box => {
+    (data.boxes || []).forEach((box) => {
       boxes.innerHTML += `
         <div class="col-md-3">
           <div class="card p-3 shadow-sm mb-3">
@@ -78,7 +78,6 @@ async function loadSummary(month, year) {
         </div>
       `;
     });
-
   } catch (err) {
     console.error(err);
     showAlert("Erro ao carregar resumo", "danger", "triangle-exclamation");
@@ -92,12 +91,11 @@ async function loadSummary(month, year) {
 async function loadCharts(month, year) {
   try {
     const data = await apiFetch(`/transactions/month?month=${month}&year=${year}`);
-
-    // data.transactions é a lista que os charts esperam
     const transactions = data.transactions || [];
 
-    // atualiza cards summary caso da API devolva também
-    // render charts
+    // importante: guarda as transações ANTES, para o seletor conseguir re-renderizar
+    window.setDashboardTransactions(transactions);
+
     renderIncomeExpenseChart(transactions);
     renderExpenseCategoryChart(transactions);
   } catch (err) {
@@ -112,4 +110,3 @@ function applyFilter() {
   loadSummary(month, year);
   loadCharts(month, year);
 }
-

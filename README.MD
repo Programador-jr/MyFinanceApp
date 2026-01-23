@@ -1,20 +1,15 @@
 # MyFinance
 
-MyFinance e uma experiencia web completa para controle financeiro pessoal e familiar. O produto centraliza entradas, saidas e metas em um painel intuitivo, com visual moderno e foco em clareza: voce entende onde esta gastando, o quanto consegue poupar e como evolui ao longo do tempo.
+MyFinance e um app web para controle financeiro pessoal e familiar. Centraliza entradas, saidas, metas e organizacao em um painel claro e rapido, com foco em experiencia premium.
 
-## O que o produto entrega
-- Visao geral em tempo real com saldo, entradas e saidas
-- Graficos claros para acompanhar tendencias e distribuicao por categoria
-- Controle de transacoes com filtros por periodo e edicao rapida
-- Gerenciamento de categorias para personalizar o seu fluxo financeiro
-- Caixinhas para separar objetivos, reservas e emergencias
-- Experiencia guiada de autenticacao, com recuperacao de senha e verificacao de email
-
-## Diferenciais
-- Interface pensada para uso diario, com foco em rapidez e legibilidade
-- Fluxos consistentes entre telas e alertas de acao imediata
-- Recursos voltados a organizacao financeira familiar
-- Design responsivo para desktop e mobile
+## Destaques
+- Dashboard com saldo, entradas e saidas em tempo real
+- Graficos de tendencia e distribuicao por categoria
+- Transacoes com filtros por periodo e edicao rapida
+- Categorias personalizaveis
+- Caixinhas para objetivos, reservas e emergencias
+- Fluxo completo de autenticacao (login, cadastro, recuperacao e verificacao)
+- PWA com instalacao customizada e modo offline
 
 ## Principais telas
 - Login e cadastro
@@ -23,9 +18,32 @@ MyFinance e uma experiencia web completa para controle financeiro pessoal e fami
 - Categorias
 - Caixinhas
 
-## Tecnologia
-- HTML, CSS e JavaScript
-- Bootstrap 5 e Font Awesome
-- Chart.js para visualizacao de dados
-- Servidor estatico em Node.js + Express
+## Stack
+- HTML, CSS, JavaScript
+- Bootstrap 5 + Font Awesome
+- Chart.js
+- Node.js + Express (server)
+- Service Worker + Manifest (PWA)
 
+## Como rodar local
+1) Instale as dependencias:
+   - `npm install`
+2) Inicie o servidor:
+   - `npm start`
+
+Abra `http://localhost:3000` (ou a porta configurada no servidor).
+
+## Variaveis de ambiente
+Crie `.env` ou `.env.local` conforme necessario.
+- `PORT` (opcional)
+- `API_URL` (opcional, se quiser sobrescrever o backend)
+
+## Estrutura (resumo)
+- `public/` assets, paginas e scripts do front
+- `server.js` servidor Express
+
+## Deploy
+Projeto pronto para deploy em plataformas de hosting estatico com Node (ex.: Vercel).
+
+## Licenca
+ISC. Consulte `LICENSE`.

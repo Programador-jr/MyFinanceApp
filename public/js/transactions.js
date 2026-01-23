@@ -184,6 +184,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const dateStr = (t.date || "").slice(0, 10).split("-").reverse().join("/");
         const typeLabel = t.type === "income" ? "Entrada" : "Saída";
 
+        // NOVO: pega nome do membro (userId populado pelo backend)
+        const memberName = t.userId?.name || "Não informado"; // optional chaining [web:91]
+
         tableBody.innerHTML += `
           <tr>
             <td>${dateStr}</td>
@@ -191,6 +194,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <td>${t.category}</td>
             <td>${groupLabels[t.group] || t.group}</td>
             <td>${fmtBRL(t.value)}</td>
+            <td>${memberName}</td>
             <td>
               <button class="btn btn-sm btn-warning me-1" type="button" data-action="edit" data-id="${t._id}">
                 <i class="fa-solid fa-pen"></i>

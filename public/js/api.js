@@ -1,38 +1,68 @@
 // public/js/api.js
 
-/**
- * =========================================================
- * API CLIENT (frontend)
- * - Adiciona Authorization automaticamente (Bearer token)
- * - Suporta dois formatos:
- *   1) apiFetch("/x", { method, headers, body })
- *   2) apiFetch("/x", "POST", { ...obj })
- * - Suporta upload com FormData (não seta Content-Type)
- * - Trata 401 (token expirado/inválido): faz logout e redireciona
- * =========================================================
- */
-
 const API_URL = window.__API_URL__ || "http://localhost:3000";
 
+const TOKEN_KEY = "token";
+const USER_KEY = "user";
+const LOGOUT_SYNC_KEY = "logout_at";
+const LAST_ACTIVITY_KEY = "last_activity_at"; // novo
+
 function getToken() {
-  return localStorage.getItem("token");
+  return localStorage.getItem(TOKEN_KEY);
 }
 
 function isFormDataBody(value) {
   return typeof FormData !== "undefined" && value instanceof FormData;
 }
 
+function logout(reason = "logout") {
+  try {
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
+
+    // remove também o last activity para não “herdar” timestamp antigo
+    localStorage.removeItem(LAST_ACTIVITY_KEY);
+
+    // avisa outras abas (storage event dispara nas outras abas) [web:144]
+    localStorage.setItem(LOGOUT_SYNC_KEY, Date.now().toString());
+  } catch (_) {}
+
+  if (typeof showAlert === "function" && !window.location.pathname.endsWith("index.html")) {
+    const message =
+      reason === "idle"
+        ? "Sessão expirada. Faça login novamente."
+        : "Sessão expirada. Faça login novamente.";
+
+    showAlert(message, "warning", "triangle-exclamation");
+
+    // dá tempo de ler a mensagem [web:104]
+    setTimeout(() => {
+      if (!window.location.pathname.endsWith("index.html")) {
+        window.location.href = "index.html?reason=" + encodeURIComponent(reason);
+      }
+    }, 2500);
+
+    return;
+  }
+
+  if (!window.location.pathname.endsWith("index.html")) {
+    window.location.href = "index.html?reason=" + encodeURIComponent(reason);
+  }
+}
+
+window.appLogout = logout;
+
+window.addEventListener("storage", (e) => {
+  if (e.key === LOGOUT_SYNC_KEY) logout("sync"); // [web:144]
+});
+
 async function apiFetch(url, methodOrOptions = "GET", body = null) {
   const token = getToken();
 
-  // Descobre se é FormData (upload)
   const formDataRequest =
     isFormDataBody(body) ||
     (typeof methodOrOptions === "object" && isFormDataBody(methodOrOptions.body));
 
-  // Headers base:
-  // - JSON: seta Content-Type application/json
-  // - FormData: NÃO seta Content-Type (browser adiciona boundary automaticamente)
   const baseHeaders = {
     ...(token && { Authorization: `Bearer ${token}` }),
     ...(formDataRequest ? {} : { "Content-Type": "application/json" }),
@@ -40,7 +70,6 @@ async function apiFetch(url, methodOrOptions = "GET", body = null) {
 
   let options = { headers: baseHeaders };
 
-  // Formato antigo: apiFetch(url, { ...options })
   if (typeof methodOrOptions === "object") {
     options = {
       ...methodOrOptions,
@@ -50,7 +79,6 @@ async function apiFetch(url, methodOrOptions = "GET", body = null) {
       },
     };
   } else {
-    // Formato novo: apiFetch(url, "POST", body)
     options.method = methodOrOptions;
 
     if (body !== null && body !== undefined) {
@@ -60,20 +88,11 @@ async function apiFetch(url, methodOrOptions = "GET", body = null) {
 
   const res = await fetch(API_URL + url, options);
 
-  // 401: token inválido/expirado -> encerra sessão
   if (res.status === 401) {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-
-    // Evita loop se já estiver no login
-    if (!window.location.pathname.endsWith("index.html")) {
-      window.location.href = "index.html";
-    }
-
+    logout("401");
     throw new Error("Sessão expirada. Faça login novamente.");
   }
 
-  // Alguns endpoints podem retornar 204 sem body
   if (res.status === 204) return null;
 
   let data = null;
@@ -84,7 +103,6 @@ async function apiFetch(url, methodOrOptions = "GET", body = null) {
   }
 
   if (!res.ok) {
-    // Se vier erro do back, tenta mostrar; senão, mensagem genérica
     if (typeof showAlert === "function") {
       showAlert(data?.error || "Erro na requisição", "danger", "triangle-exclamation");
     }

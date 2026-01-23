@@ -11,6 +11,25 @@
  */
 
 document.addEventListener("DOMContentLoaded", () => {
+  const isStandalone =
+    window.matchMedia("(display-mode: standalone)").matches ||
+    window.navigator.standalone === true;
+
+  if (isStandalone) {
+    const existingToken = localStorage.getItem("token");
+    const redirectKey = "mf_login_redirect_once";
+
+    try {
+      if (existingToken && sessionStorage.getItem(redirectKey) !== "1") {
+        sessionStorage.setItem(redirectKey, "1");
+        window.location.href = "dashboard.html";
+        return;
+      }
+    } catch {
+      // fallback: if sessionStorage fails, avoid looping
+    }
+  }
+
   const form = document.getElementById("loginForm");
   if (!form) return;
 
