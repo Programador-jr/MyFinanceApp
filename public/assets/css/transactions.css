@@ -363,6 +363,7 @@ h3::after {
   border: 1px solid var(--border-color);
   border-radius: 16px;
   backdrop-filter: blur(15px);
+  z-index: 1050;
 }
 
 .modal-header {

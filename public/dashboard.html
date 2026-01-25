@@ -3,26 +3,28 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#111111">
+  <link rel="apple-touch-icon" href="/assets/icons/icon-192.png">
+
   <title>MyFinance | Dashboard</title>
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link href="assets/css/navbar.css" rel="stylesheet">
   <link href="assets/css/dashboard.css" rel="stylesheet">
+  <link href="assets/css/periodFilter.css" rel="stylesheet">
 </head>
 
 <body>
 
-<!-- NAVBAR FIXA -->
 <div id="loadNavbar"></div>
 
-<!-- ALERT CONTAINER -->
 <div id="alert-container"
      class="position-fixed top-0 start-50 translate-middle-x mt-3"
      style="z-index: 1055; width: 90%; max-width: 420px;">
 </div>
 
-<!-- INVITE CODE MODAL -->
 <div class="modal fade" id="inviteModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-sm modal-dialog-centered">
     <div class="modal-content">
@@ -50,7 +52,6 @@
   </div>
 </div>
 
-<!-- Modal de confirmação de logout -->
 <div class="modal fade" id="logoutConfirmModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -73,10 +74,69 @@
   </div>
 </div>
 
-<!-- CONTEÚDO -->
-<div class="container-xxl py-3 py-md-4">
+<div class="modal fade" id="periodModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content period-modal">
+      <div class="modal-header border-0">
+        <h5 class="modal-title">Definir mês</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
 
-  <!-- RESUMO -->
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-6">
+            <label class="form-label text-muted">Mês</label>
+            <select id="pickerMonth" class="form-select period-select"></select>
+          </div>
+          <div class="col-6">
+            <label class="form-label text-muted">Ano</label>
+            <select id="pickerYear" class="form-select period-select"></select>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer border-0 d-flex justify-content-between">
+        <button type="button" class="btn btn-link text-secondary" id="clearPeriod">LIMPAR</button>
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-link text-secondary" data-bs-dismiss="modal">CANCELAR</button>
+          <button type="button" class="btn btn-primary" id="setPeriod">DEFINIR</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container-xxl py-3 py-md-4">
+  <div class="col-12 mb-3">
+    <div class="row align-items-center g-2">
+      <div class="col-12 col-sm-8 col-md-6 col-lg-5">
+        <div class="period-bar d-flex align-items-center justify-content-between">
+          <button type="button" class="period-nav" id="prevPeriod" aria-label="Mês anterior">
+            <i class="fa-solid fa-chevron-left"></i>
+          </button>
+
+          <button type="button" class="period-center" id="openPeriodPicker" data-bs-toggle="modal" data-bs-target="#periodModal">
+            <span id="periodLabel">-- ----</span>
+            <i class="fa-regular fa-calendar ms-2"></i>
+          </button>
+
+          <button type="button" class="period-nav" id="nextPeriod" aria-label="Próximo mês">
+            <i class="fa-solid fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="col-12 col-sm-4 col-md-6 col-lg-7 d-flex align-items-center">
+        <small class="text-muted d-none d-md-block">Filtros aplicados ao mês selecionado</small>
+      </div>
+
+      <div class="d-none">
+        <select id="month" class="form-select"></select>
+        <select id="year" class="form-select"></select>
+      </div>
+    </div>
+  </div>
+
   <div class="row g-3 mb-4">
     <div class="col-12 col-md-4">
       <div class="alert alert-success p-4 p-md-3 shadow-sm h-100">
@@ -100,20 +160,16 @@
     </div>
   </div>
 
-  <!-- CAIXINHAS -->
   <div class="row mb-4">
     <div class="col-12 d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3">
       <h5 class="mb-0"><i class="fa-solid fa-piggy-bank me-2"></i> Caixinhas</h5>
 
-      <!-- no mobile: botão grande e fácil de clicar -->
       <a href="boxes.html" class="btn btn-outline-primary  w-sm-auto">
         <i class="fa-solid fa-plus me-1"></i> Nova Caixinha
       </a>
     </div>
 
-    <div id="boxes" class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3">
-      <!-- O conteúdo será carregado via JavaScript -->
-    </div>
+    <div id="boxes" class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3"></div>
 
     <div id="emptyBoxes" class="d-none text-center py-5">
       <i class="fa-solid fa-piggy-bank fa-3x mb-3 text-muted"></i>
@@ -125,28 +181,7 @@
     </div>
   </div>
 
-  <!-- FILTROS E GRÁFICOS -->
   <div class="row mt-4">
-    <div class="col-12 mb-3">
-      <div class="row g-2">
-        <div class="col-12 col-sm-3 col-md-3">
-          <select id="month" class="form-select"></select>
-        </div>
-
-        <div class="col-12 col-sm-3 col-md-3">
-          <select id="year" class="form-select"></select>
-        </div>
-
-        <div class="col-12 col-sm-3 col-md-3">
-          <button class="btn btn-primary " id="filterBtn">Filtrar <i class="fa-solid fa-filter-circle-dollar"></i></button> 
-        </div>
-
-        <div class="col-12 col-sm-6 col-md-3 d-flex align-items-center">
-          <small class="text-muted d-none d-md-block">Filtros aplicados ao mês corrente</small>
-        </div>
-      </div>
-    </div>
-
     <div class="col-12 col-lg-6 mb-3">
       <div class="card p-4 p-md-3 shadow-sm h-100">
         <h6 class="mb-3">Entradas x Saídas</h6>
@@ -159,7 +194,17 @@
 
     <div class="col-12 col-lg-6 mb-3">
       <div class="card p-4 p-md-3 shadow-sm h-100">
-        <h6 class="mb-3">Despesas por Categoria</h6>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6 class="mb-0">Despesas por Categoria</h6>
+
+          <select id="expenseCategoryChartType" class="form-select form-select-sm" style="max-width: 160px;">
+            <option value="bar">Barras</option>
+            <option value="line">Linhas</option>
+            <option value="doughnut">Rosca</option>
+            <option value="pie">Pizza</option>
+          </select>
+        </div>
+
         <div class="chart-wrap" style="height: 320px;">
           <canvas id="expenseCategoryChart"></canvas>
           <div id="expenseCategoryEmpty" class="chart-placeholder d-none">Sem dados para o período selecionado</div>
@@ -168,14 +213,12 @@
     </div>
   </div>
 
-  <!-- BOTÃO mostrar análise avançada -->
   <div class="mb-4">
     <button id="toggleAdvancedBtn" class="btn btn-outline-secondary  w-sm-auto">
       <i class="fa-solid fa-wand-magic-sparkles"></i> Mostrar análise avançada
     </button>
   </div>
 
-  <!-- ANÁLISE AVANÇADA -->
   <div id="advancedContainer" class="collapse">
     <div class="card p-4 shadow-sm mb-5">
       <h5 class="mb-4">
@@ -184,13 +227,21 @@
 
       <div class="row g-3 mb-4">
         <div class="col-12 col-md-3">
-          <label class="form-label">Data inicial</label>
-          <input type="date" id="startDate" class="form-control">
+          <label class="form-label">Comparação</label>
+          <select id="compareMode" class="form-select">
+            <option value="month" selected>Mês atual vs mês anterior</option>
+            <option value="year">Ano atual vs ano anterior</option>
+          </select>
         </div>
 
-        <div class="col-12 col-md-3">
-          <label class="form-label">Data final</label>
-          <input type="date" id="endDate" class="form-control">
+        <div class="col-12 col-md-3" id="monthPickerBlock">
+          <label class="form-label">Mês</label>
+          <input type="month" id="monthRef" class="form-control">
+        </div>
+
+        <div class="col-12 col-md-3 d-none" id="yearPickerBlock">
+          <label class="form-label">Ano</label>
+          <input type="number" id="yearRef" class="form-control" min="2000" max="2100" step="1">
         </div>
 
         <div class="col-12 col-md-3">
@@ -202,13 +253,25 @@
           </select>
         </div>
 
-        <div class="col-12 col-md-3 d-flex align-items-end">
-          <button class="btn btn-primary " id="compareBtn">Comparar</button>
+        <div class="col-12 col-md-3">
+          <label class="form-label">Visualização</label>
+          <select id="advancedView" class="form-select">
+            <option value="category" selected>Por categoria</option>
+            <option value="daily">Linha do tempo</option>
+          </select>
+        </div>
+
+        <div class="col-12 d-flex align-items-end">
+          <button type="button" class="btn btn-primary" id="compareBtn">Comparar</button>
         </div>
       </div>
 
       <div class="card p-3 shadow-sm" style="height: 320px;">
         <canvas id="advancedComparisonChart"></canvas>
+      </div>
+
+      <div class="card p-3 shadow-sm mt-3" style="height: 260px;">
+        <canvas id="timelineChart"></canvas>
       </div>
 
       <div id="comparisonBadge" class="mt-3 text-center fw-bold"></div>
@@ -243,18 +306,22 @@
     </div>
   </div>
 
-</div><!-- /container -->
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 <script src="js/api.js"></script>
+<script src="js/pwa.js"></script>
 <script src="js/utils.js"></script>
 <script src="js/auth.js"></script>
+<script src="js/idleLogout.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script src="js/charts.js"></script>
 <script src="js/loadNavbar.js"></script>
 <script src="js/profileMenu.js"></script>
 <script src="js/dashboard.js"></script>
+<script src="js/periodFilter.js"></script>
 <script src="js/advancedComparison.js"></script>
+
 </body>
 </html>

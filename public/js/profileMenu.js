@@ -99,19 +99,21 @@ function applyProfileToNavbar() {
   // Preferência: avatar vindo do backend (avatarUrl)
   // Fallback: avatar antigo em base64 (avatarDataUrl)
   const apiBase = window.__API_URL__ || "http://localhost:3000";
-  if (prefs.avatarUrl) {
-    img.src = apiBase + prefs.avatarUrl;
-    img.classList.remove("d-none");
-    fallback.classList.add("d-none");
-  } else if (prefs.avatarDataUrl) {
-    img.src = prefs.avatarDataUrl;
-    img.classList.remove("d-none");
-    fallback.classList.add("d-none");
-  } else {
-    img.classList.add("d-none");
-    fallback.classList.remove("d-none");
-    fallback.textContent = pickInitial(name);
-  }
+if (prefs.avatarUrl) {
+  const isAbs = /^https?:\/\//i.test(prefs.avatarUrl);
+  img.src = isAbs ? prefs.avatarUrl : (apiBase + prefs.avatarUrl);
+
+  img.classList.remove("d-none");
+  fallback.classList.add("d-none");
+} else if (prefs.avatarDataUrl) {
+  img.src = prefs.avatarDataUrl;
+  img.classList.remove("d-none");
+  fallback.classList.add("d-none");
+} else {
+  img.classList.add("d-none");
+  fallback.classList.remove("d-none");
+  fallback.textContent = pickInitial(name);
+}
 
   document.querySelectorAll("#profileColorPicker .profile-color").forEach((btn) => {
     btn.classList.toggle("active", btn.dataset.color === color);

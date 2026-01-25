@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b0f1a" />
+  <title>Offline | MyFinance</title>
+
+  <style>
+    :root {
+      --mf-primary: #3b82f6;
+      --mf-primary-rgb: 59, 130, 246;
+
+      --bg-0: #0f172a;
+      --bg-1: #0b1222;
+      --card: rgba(30, 41, 59, 0.8);
+      --card-2: rgba(30, 41, 59, 0.9);
+      --stroke: rgba(255, 255, 255, 0.12);
+
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+
+      --good: #10b981;
+      --warn: #f59e0b;
+      --bad: #ef4444;
+
+      --shadow: 0 28px 80px rgba(0, 0, 0, 0.5);
+      --shadow-soft: 0 12px 36px rgba(0, 0, 0, 0.35);
+
+      --r: 22px;
+      --r2: 16px;
+
+      --font: "Segoe UI", system-ui, -apple-system, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg-0: #eef3ff;
+        --bg-1: #dfe8ff;
+        --card: rgba(0, 0, 0, 0.05);
+        --card-2: rgba(0, 0, 0, 0.08);
+        --stroke: rgba(0, 0, 0, 0.12);
+
+        --text: rgba(0, 0, 0, 0.88);
+        --muted: rgba(0, 0, 0, 0.62);
+
+        --shadow: 0 28px 80px rgba(0, 0, 0, 0.18);
+        --shadow-soft: 0 12px 36px rgba(0, 0, 0, 0.12);
+      }
+      meta[name="theme-color"] { content: #dfe8ff; }
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      color: var(--text);
+      overflow-x: hidden;
+      background:
+        radial-gradient(1200px 700px at 15% 20%, rgba(var(--mf-primary-rgb), 0.18), transparent 60%),
+        radial-gradient(1100px 760px at 85% 30%, rgba(139, 92, 246, 0.16), transparent 60%),
+        radial-gradient(900px 700px at 50% 85%, rgba(6, 182, 212, 0.12), transparent 60%),
+        linear-gradient(180deg, var(--bg-0), var(--bg-1));
+    }
+
+    /* Subtle noise overlay */
+    .noise {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.14;
+      mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
+      background-size: 160px 160px;
+    }
+
+    /* Floating orbs */
+    .orb {
+      position: fixed;
+      width: 420px;
+      height: 420px;
+      border-radius: 50%;
+      filter: blur(35px);
+      opacity: 0.38;
+      transform: translate3d(0,0,0);
+      animation: float 10s ease-in-out infinite;
+      pointer-events: none;
+    }
+    .orb.a {
+      left: -120px;
+      top: -140px;
+      background: radial-gradient(circle at 35% 35%, rgba(48,227,181,0.75), rgba(48,227,181,0) 60%);
+      animation-duration: 12s;
+    }
+    .orb.b {
+      right: -150px;
+      top: 8vh;
+      background: radial-gradient(circle at 35% 35%, rgba(255,92,122,0.55), rgba(255,92,122,0) 60%);
+      animation-duration: 14s;
+      animation-delay: -3s;
+    }
+    .orb.c {
+      left: 18vw;
+      bottom: -200px;
+      width: 520px;
+      height: 520px;
+      background: radial-gradient(circle at 35% 35%, rgba(255,204,102,0.55), rgba(255,204,102,0) 65%);
+      animation-duration: 16s;
+      animation-delay: -6s;
+    }
+    @keyframes float {
+      0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+      50% { transform: translate3d(0, 18px, 0) scale(1.03); }
+    }
+
+    /* Layout */
+    .wrap {
+      min-height: 100%;
+      display: grid;
+      place-items: center;
+      padding: 32px 16px 80px;
+      position: relative;
+    }
+
+    .card {
+      width: min(980px, 100%);
+      background:
+        linear-gradient(180deg, rgba(30, 41, 59, 0.92), rgba(15, 23, 42, 0.92)),
+        radial-gradient(900px 500px at 20% -20%, rgba(255,255,255,0.10), transparent 60%);
+      border: 1px solid var(--stroke);
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--mf-primary), #06b6d4);
+      opacity: 0.9;
+    }
+
+    .top {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 18px;
+      padding: 28px 28px 18px;
+    }
+
+    @media (max-width: 860px) {
+      .top { grid-template-columns: 1fr; padding: 22px 18px 14px; }
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+      opacity: 0;
+      transform: translateY(10px);
+      animation: enter 650ms ease forwards;
+    }
+
+    .logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(var(--mf-primary-rgb), 0.85), rgba(var(--mf-primary-rgb), 0.15)),
+        radial-gradient(circle at 70% 70%, rgba(139, 92, 246, 0.45), rgba(139,92,246,0.12));
+      border: 1px solid var(--stroke);
+      box-shadow: var(--shadow-soft);
+      position: relative;
+      overflow: hidden;
+    }
+    .logo::after{
+      content:"";
+      position:absolute;
+      inset:-40%;
+      background: linear-gradient(120deg, transparent 35%, rgba(255,255,255,0.55), transparent 65%);
+      transform: rotate(10deg);
+      animation: sheen 2.2s ease-in-out infinite;
+      opacity: 0.55;
+    }
+    @keyframes sheen {
+      0% { transform: translateX(-40%) rotate(10deg); opacity: 0; }
+      35% { opacity: .55; }
+      65% { opacity: .55; }
+      100% { transform: translateX(40%) rotate(10deg); opacity: 0; }
+    }
+
+    .brand h1 {
+      font-size: 16px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      margin: 0;
+      opacity: 0.9;
+    }
+
+    .headline {
+      margin-top: 10px;
+      opacity: 0;
+      transform: translateY(12px);
+      animation: enter 700ms ease forwards;
+      animation-delay: 80ms;
+    }
+    .headline h2 {
+      font-size: clamp(28px, 4vw, 42px);
+      line-height: 1.06;
+      margin: 0 0 10px;
+      letter-spacing: -0.02em;
+    }
+    .headline p {
+      margin: 0;
+      max-width: 58ch;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.55;
+    }
+
+    @keyframes enter {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .panel {
+      border-radius: var(--r2);
+      background: linear-gradient(180deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9));
+      border: 1px solid var(--stroke);
+      box-shadow: var(--shadow-soft);
+      padding: 18px;
+      align-self: start;
+      opacity: 0;
+      transform: translateY(12px);
+      animation: enter 720ms ease forwards;
+      animation-delay: 120ms;
+    }
+
+    .panelTitle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,0.06);
+      color: var(--muted);
+      font-size: 12px;
+      user-select: none;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--warn);
+      box-shadow: 0 0 0 6px rgba(255, 204, 102, 0.16);
+      animation: pulse 1.25s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.9; }
+      50% { transform: scale(1.08); opacity: 1; }
+    }
+
+    .panel h3 {
+      margin: 0;
+      font-size: 14px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0.88;
+    }
+
+    .panel ul {
+      margin: 12px 0 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .li {
+      display: grid;
+      grid-template-columns: 20px 1fr;
+      gap: 10px;
+      align-items: start;
+    }
+    .li svg { margin-top: 2px; opacity: 0.95; }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .btn {
+      appearance: none;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      display: inline-flex;
+      gap: 10px;
+      align-items: center;
+      transition: transform 140ms ease, background 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+      box-shadow: 0 10px 26px rgba(0,0,0,0.16);
+      user-select: none;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      background: rgba(255,255,255,0.10);
+      border-color: rgba(255,255,255,0.22);
+    }
+    .btn:active { transform: translateY(0px) scale(0.99); }
+    .btn:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 4px rgba(48, 227, 181, 0.22), 0 10px 26px rgba(0,0,0,0.16);
+      border-color: rgba(48, 227, 181, 0.45);
+    }
+
+    .btn.primary {
+      border-color: rgba(var(--mf-primary-rgb), 0.35);
+      background: linear-gradient(135deg, var(--mf-primary), #2563eb);
+      color: #0b0f1a;
+      box-shadow: 0 10px 24px rgba(var(--mf-primary-rgb), 0.35);
+    }
+    .btn.primary:hover {
+      border-color: rgba(var(--mf-primary-rgb), 0.55);
+      background: linear-gradient(135deg, #60a5fa, var(--mf-primary));
+    }
+
+    .btn.ghost {
+      background: transparent;
+      box-shadow: none;
+    }
+
+    /* Divider area */
+    .mid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      padding: 0 28px 18px;
+    }
+    @media (max-width: 860px) { .mid { padding: 0 18px 16px; } }
+
+    .status {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 14px;
+      align-items: center;
+      padding: 16px;
+      border-radius: var(--r2);
+      border: 1px solid var(--stroke);
+      background: rgba(15, 23, 42, 0.45);
+      opacity: 0;
+      transform: translateY(12px);
+      animation: enter 720ms ease forwards;
+      animation-delay: 160ms;
+    }
+    @media (max-width: 720px) {
+      .status { grid-template-columns: 1fr; }
+    }
+
+    .statusLeft {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .wifi {
+      width: 44px;
+      height: 44px;
+      border-radius: 16px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,0.06);
+      display: grid;
+      place-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .wifi::after{
+      content:"";
+      position:absolute;
+      inset:-55%;
+      background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.20), transparent 55%);
+      animation: drift 2.8s ease-in-out infinite;
+    }
+    @keyframes drift {
+      0%,100% { transform: translate(-12px, -6px); }
+      50% { transform: translate(10px, 8px); }
+    }
+
+    .status h4 {
+      margin: 0;
+      font-size: 16px;
+      letter-spacing: -0.01em;
+    }
+    .status p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .statusRight {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .mini {
+      font-size: 12px;
+      padding: 10px 12px;
+      border-radius: 12px;
+    }
+
+    /* Footer */
+    .foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 18px 18px;
+      border-top: 1px solid rgba(255,255,255,0.10);
+      color: var(--muted);
+      font-size: 12px;
+      opacity: 0.92;
+      gap: 12px;
+    }
+    .foot a {
+      color: inherit;
+      text-decoration: none;
+      border-bottom: 1px dashed rgba(255,255,255,0.25);
+    }
+    .foot a:hover { border-bottom-color: rgba(48,227,181,0.55); }
+
+    /* Bottom animated wave */
+    .wave {
+      position: absolute;
+      left: -10%;
+      right: -10%;
+      bottom: -1px;
+      height: 160px;
+      opacity: 0.55;
+      pointer-events: none;
+    }
+    .wave path {
+      animation: waveMove 7.5s ease-in-out infinite;
+      transform-origin: center;
+    }
+    .wave path:nth-child(2) {
+      animation-duration: 10.2s;
+      animation-delay: -2s;
+      opacity: 0.6;
+    }
+    .wave path:nth-child(3) {
+      animation-duration: 12.8s;
+      animation-delay: -4s;
+      opacity: 0.35;
+    }
+    @keyframes waveMove {
+      0%,100% { transform: translateX(0); }
+      50% { transform: translateX(-18px); }
+    }
+
+    /* ---------------- MODAL (NOVO) ---------------- */
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      place-items: center;
+      padding: 20px;
+      z-index: 9999;
+    }
+    .modal.open { display: grid; }
+
+    .modalOverlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      opacity: 0;
+      animation: overlayIn 180ms ease forwards;
+    }
+    @keyframes overlayIn {
+      to { opacity: 1; }
+    }
+
+    .modalCard {
+      position: relative;
+      width: min(680px, 100%);
+      border-radius: calc(var(--r) + 2px);
+      border: 1px solid var(--stroke);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.05)),
+        radial-gradient(900px 500px at 20% -30%, rgba(255,255,255,0.14), transparent 60%);
+      box-shadow: var(--shadow);
+      transform: translateY(10px) scale(0.985);
+      opacity: 0;
+      animation: modalIn 220ms cubic-bezier(.2,.8,.2,1) forwards;
+      overflow: hidden;
+    }
+    @keyframes modalIn {
+      to { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    .modalHeader {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 18px 18px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.10);
+    }
+
+    .modalTitleWrap {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .modalIcon {
+      width: 40px;
+      height: 40px;
+      border-radius: 16px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,0.06);
+      display: grid;
+      place-items: center;
+      box-shadow: var(--shadow-soft);
+      flex: 0 0 auto;
+    }
+
+    .modalHeader h3 {
+      margin: 0;
+      font-size: 15px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0.9;
+    }
+    .modalHeader p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .modalClose {
+      appearance: none;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: transform 140ms ease, background 140ms ease, border-color 140ms ease;
+      user-select: none;
+    }
+    .modalClose:hover {
+      transform: translateY(-1px);
+      background: rgba(255,255,255,0.10);
+      border-color: rgba(255,255,255,0.22);
+    }
+    .modalClose:active { transform: translateY(0) scale(0.99); }
+    .modalClose:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 4px rgba(48, 227, 181, 0.22);
+      border-color: rgba(48, 227, 181, 0.45);
+    }
+
+    .modalBody {
+      padding: 14px 18px 18px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .modalList {
+      margin: 10px 0 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 10px;
+    }
+    .modalItem {
+      display: grid;
+      grid-template-columns: 18px 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 12px 12px;
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.04);
+    }
+
+    .modalFooter {
+      padding: 14px 18px 18px;
+      border-top: 1px solid rgba(255,255,255,0.10);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+      .logo::after, .wifi::after { display: none !important; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="orb a"></div>
+  <div class="orb b"></div>
+  <div class="orb c"></div>
+  <div class="noise" aria-hidden="true"></div>
+
+  <main class="wrap">
+    <section class="card" role="region" aria-label="Página offline">
+      <div class="top">
+        <div>
+          <div class="brand">
+            <div class="logo" aria-hidden="true"></div>
+            <h1>MyFinance</h1>
+          </div>
+
+          <div class="headline">
+            <h2>Você está offline.</h2>
+            <p>
+              Sem internet no momento. Você ainda pode acessar o que já foi carregado e tentar reconectar quando quiser.
+              Assim que a conexão voltar, a página pode ser atualizada automaticamente.
+            </p>
+
+            <div class="actions" aria-label="Ações rápidas">
+              <button class="btn primary" id="btnTry" type="button">
+                <span aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path d="M20 12a8 8 0 0 1-14.9 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M4 12a8 8 0 0 1 14.9-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M8 7V4H5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M16 17v3h3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </span>
+                Tentar novamente
+              </button>
+
+              <button class="btn" id="btnHome" type="button">
+                <span aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path d="M3 10.5 12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1v-10.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                  </svg>
+                </span>
+                Voltar para o início
+              </button>
+
+              <button class="btn ghost" id="btnHelp" type="button">
+                <span aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 18h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M9.5 9a2.5 2.5 0 1 1 4.2 1.8c-.9.8-1.7 1.3-1.7 2.7v.2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" stroke="currentColor" stroke-width="2"/>
+                  </svg>
+                </span>
+                Dicas
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <aside class="panel" aria-label="O que você pode fazer offline">
+          <div class="panelTitle">
+            <h3>Enquanto isso…</h3>
+            <span class="chip"><span class="dot" aria-hidden="true"></span> Conexão ausente</span>
+          </div>
+
+          <ul>
+            <li class="li">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M20 7h-9l-2 2H4v10h16V7Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              </svg>
+              <span>Você pode ver páginas que já estavam em cache (se o Service Worker tiver salvado).</span>
+            </li>
+
+            <li class="li">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 2v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M12 18v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M4.93 4.93l2.83 2.83" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M16.24 16.24l2.83 2.83" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M2 12h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M18 12h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M4.93 19.07l2.83-2.83" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M16.24 7.76l2.83-2.83" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <span>Quando a internet voltar, clique em <b>Tentar novamente</b> para recarregar.</span>
+            </li>
+
+            <li class="li">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" stroke="currentColor" stroke-width="2"/>
+              </svg>
+              <span>Se você estiver no app instalado (PWA), ele abre mesmo offline (dependendo do cache).</span>
+            </li>
+          </ul>
+        </aside>
+      </div>
+
+      <div class="mid">
+        <div class="status" aria-live="polite">
+          <div class="statusLeft">
+            <div class="wifi" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                <path d="M2 8.82C7.5 4.4 16.5 4.4 22 8.82" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M5 12.23c4-3.2 10-3.2 14 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M8.5 15.64c2-1.6 5-1.6 7 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M12 19.3h.01" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div>
+              <h4 id="statusTitle">Detectando conexão…</h4>
+              <p id="statusDesc">Vamos tentar novamente assim que sua rede voltar.</p>
+            </div>
+          </div>
+
+          <div class="statusRight">
+            <button class="btn mini" id="btnCopy" type="button" title="Copiar diagnóstico">
+              <span aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <path d="M8 7h11v14H8V7Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                  <path d="M5 17H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+              </span>
+              Copiar info
+            </button>
+
+            <button class="btn mini" id="btnReload" type="button" title="Recarregar agora">
+              <span aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <path d="M20 12a8 8 0 0 1-14.9 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  <path d="M4 12a8 8 0 0 1 14.9-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+              </span>
+              Recarregar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <footer class="foot">
+        <div>
+          <span id="timeNow">—</span> • <span id="connNow">offline</span>
+        </div>
+        <div>
+          <a href="#" id="btnWhy">Por que isso acontece?</a>
+        </div>
+      </footer>
+
+      <svg class="wave" viewBox="0 0 1200 200" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0,120 C120,80 240,160 360,120 C480,80 600,160 720,120 C840,80 960,160 1080,120 C1140,100 1170,90 1200,80 L1200,200 L0,200 Z"
+              fill="rgba(48,227,181,0.20)"></path>
+        <path d="M0,140 C160,110 260,170 420,140 C580,110 680,170 840,140 C1000,110 1080,150 1200,120 L1200,200 L0,200 Z"
+              fill="rgba(255,92,122,0.14)"></path>
+        <path d="M0,155 C140,130 280,190 420,155 C560,120 700,190 840,155 C980,120 1100,170 1200,150 L1200,200 L0,200 Z"
+              fill="rgba(255,204,102,0.12)"></path>
+      </svg>
+    </section>
+
+    <!-- MODAL: Dicas -->
+    <section class="modal" id="modalHelp" role="dialog" aria-modal="true" aria-labelledby="helpTitle" aria-describedby="helpDesc">
+      <div class="modalOverlay" data-close="true" tabindex="-1" aria-hidden="true"></div>
+
+      <div class="modalCard" role="document">
+        <header class="modalHeader">
+          <div class="modalTitleWrap">
+            <div class="modalIcon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M12 18h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M9.5 9a2.5 2.5 0 1 1 4.2 1.8c-.9.8-1.7 1.3-1.7 2.7v.2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" stroke="currentColor" stroke-width="2"/>
+              </svg>
+            </div>
+            <div>
+              <h3 id="helpTitle">Dicas</h3>
+              <p id="helpDesc">Coisinhas rápidas que geralmente resolvem.</p>
+            </div>
+          </div>
+
+          <button class="modalClose" type="button" data-close="true" aria-label="Fechar modal">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </header>
+
+        <div class="modalBody">
+          <ul class="modalList">
+            <li class="modalItem">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 2v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M12 18v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M4.93 4.93l2.83 2.83" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M16.24 16.24l2.83 2.83" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <div>
+                <b>Ative e desative o modo avião</b><br/>
+                Isso força o celular a renegociar a conexão.
+              </div>
+            </li>
+
+            <li class="modalItem">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M2 12h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M16 12h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M8 7l-3 5 3 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M16 7l3 5-3 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <div>
+                <b>Troque entre Wi-Fi e dados móveis</b><br/>
+                Às vezes a rede atual está instável ou sem rota.
+              </div>
+            </li>
+
+            <li class="modalItem">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" stroke="currentColor" stroke-width="2"/>
+              </svg>
+              <div>
+                <b>Se estiver no PWA</b><br/>
+                Feche e abra o app. Algumas páginas podem já estar em cache.
+              </div>
+            </li>
+
+            <li class="modalItem">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M20 12a8 8 0 0 1-14.9 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M4 12a8 8 0 0 1 14.9-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <div>
+                <b>Depois, clique em “Tentar novamente”</b><br/>
+                Assim que a internet voltar, recarregue a página.
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <footer class="modalFooter">
+          <button class="btn" type="button" data-close="true">Fechar</button>
+          <button class="btn primary" type="button" id="modalHelpReload">Recarregar</button>
+        </footer>
+      </div>
+    </section>
+
+    <!-- MODAL: Por que isso acontece? -->
+    <section class="modal" id="modalWhy" role="dialog" aria-modal="true" aria-labelledby="whyTitle" aria-describedby="whyDesc">
+      <div class="modalOverlay" data-close="true" tabindex="-1" aria-hidden="true"></div>
+
+      <div class="modalCard" role="document">
+        <header class="modalHeader">
+          <div class="modalTitleWrap">
+            <div class="modalIcon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" stroke="currentColor" stroke-width="2"/>
+                <path d="M12 17h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M10.5 10a2 2 0 1 1 3.2 1.6c-.7.6-1.2 1-1.2 2.1v.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div>
+              <h3 id="whyTitle">Por que isso acontece?</h3>
+              <p id="whyDesc">As causas mais comuns e o que o app faz.</p>
+            </div>
+          </div>
+
+          <button class="modalClose" type="button" data-close="true" aria-label="Fechar modal">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </header>
+
+        <div class="modalBody">
+          <ul class="modalList">
+            <li class="modalItem">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M2 8.82C7.5 4.4 16.5 4.4 22 8.82" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M5 12.23c4-3.2 10-3.2 14 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M8.5 15.64c2-1.6 5-1.6 7 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <div>
+                <b>Sem internet / sinal fraco</b><br/>
+                A navegação falha e o app mostra esta tela offline.
+              </div>
+            </li>
+
+            <li class="modalItem">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M20 7h-9l-2 2H4v10h16V7Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              </svg>
+              <div>
+                <b>Conteúdo não estava em cache</b><br/>
+                Se o Service Worker não salvou aquela rota/arquivo, ele não consegue entregar offline.
+              </div>
+            </li>
+
+            <li class="modalItem">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 2v10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M12 16v6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M4 12h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <div>
+                <b>Servidor/API indisponível</b><br/>
+                Mesmo com internet, se a API estiver fora, algumas páginas/ações podem falhar.
+              </div>
+            </li>
+
+            <li class="modalItem">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M20 12a8 8 0 0 1-14.9 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M4 12a8 8 0 0 1 14.9-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <div>
+                <b>O que fazer?</b><br/>
+                Quando a rede voltar, recarregue. Se persistir, copie as informações e mande pra debug.
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <footer class="modalFooter">
+          <button class="btn" type="button" data-close="true">Fechar</button>
+          <button class="btn primary" type="button" id="modalWhyCopy">Copiar info</button>
+        </footer>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      const $ = (id) => document.getElementById(id);
+
+      const statusTitle = $("statusTitle");
+      const statusDesc = $("statusDesc");
+      const timeNow = $("timeNow");
+      const connNow = $("connNow");
+
+      // ------------------ helpers ------------------
+      function formatNow() {
+        try {
+          const d = new Date();
+          const f = new Intl.DateTimeFormat("pt-BR", {
+            weekday: "short",
+            day: "2-digit",
+            month: "short",
+            hour: "2-digit",
+            minute: "2-digit"
+          });
+          return f.format(d);
+        } catch {
+          return new Date().toLocaleString();
+        }
+      }
+
+      function setConnUI(isOnline) {
+        connNow.textContent = isOnline ? "online" : "offline";
+
+        if (isOnline) {
+          statusTitle.textContent = "Conexão detectada ✅";
+          statusDesc.textContent = "Sua internet voltou. Você pode recarregar a página agora.";
+        } else {
+          statusTitle.textContent = "Sem conexão no momento";
+          statusDesc.textContent = "Verifique Wi-Fi/dados móveis e tente recarregar.";
+        }
+      }
+
+      function softReload() {
+        try {
+          const lastUrl = sessionStorage.getItem("mf_pwa_last_url");
+          if (lastUrl) {
+            location.href = lastUrl;
+            return;
+          }
+        } catch {}
+        location.href = "/dashboard.html";
+      }
+
+      async function copyDiagnostics() {
+        const info =
+          `MyFinance Offline\n` +
+          `Data/Hora: ${formatNow()}\n` +
+          `navigator.onLine: ${navigator.onLine}\n` +
+          `User-Agent: ${navigator.userAgent}\n` +
+          `URL: ${location.href}\n`;
+
+        try {
+          await navigator.clipboard.writeText(info);
+          statusDesc.textContent = "Info copiada ✅ (cole no chat/suporte se precisar).";
+        } catch {
+          const ta = document.createElement("textarea");
+          ta.value = info;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          ta.remove();
+          statusDesc.textContent = "Info copiada ✅ (modo alternativo).";
+        }
+      }
+
+      // ------------------ modal system ------------------
+      let lastFocus = null;
+
+      function getFocusable(container) {
+        return container.querySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+      }
+
+      function openModal(modalEl) {
+        if (!modalEl) return;
+        lastFocus = document.activeElement;
+
+        modalEl.classList.add("open");
+        document.body.style.overflow = "hidden";
+
+        const focusables = getFocusable(modalEl);
+        if (focusables.length) focusables[0].focus();
+      }
+
+      function closeModal(modalEl) {
+        if (!modalEl) return;
+
+        modalEl.classList.remove("open");
+        document.body.style.overflow = "";
+
+        if (lastFocus && typeof lastFocus.focus === "function") {
+          lastFocus.focus();
+        }
+      }
+
+      function closeAnyModal() {
+        const open = document.querySelector(".modal.open");
+        if (open) closeModal(open);
+      }
+
+      // Close on overlay click / [data-close]
+      document.addEventListener("click", (e) => {
+        const closeBtn = e.target.closest("[data-close='true']");
+        if (closeBtn) {
+          const modal = e.target.closest(".modal");
+          closeModal(modal);
+        }
+      });
+
+      // ESC to close + focus trap
+      document.addEventListener("keydown", (e) => {
+        const open = document.querySelector(".modal.open");
+        if (!open) return;
+
+        if (e.key === "Escape") {
+          e.preventDefault();
+          closeModal(open);
+          return;
+        }
+
+        if (e.key === "Tab") {
+          const focusables = Array.from(getFocusable(open));
+          if (!focusables.length) return;
+
+          const first = focusables[0];
+          const last = focusables[focusables.length - 1];
+
+          if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      });
+
+      // ------------------ bindings ------------------
+      $("btnTry").addEventListener("click", softReload);
+      $("btnReload").addEventListener("click", softReload);
+
+      $("btnHome").addEventListener("click", () => {
+        location.href = "/index.html"; // ajuste se seu home for outro caminho
+      });
+
+      // Modais
+      const modalHelp = $("modalHelp");
+      const modalWhy = $("modalWhy");
+
+      $("btnHelp").addEventListener("click", () => openModal(modalHelp));
+      $("btnWhy").addEventListener("click", (e) => {
+        e.preventDefault();
+        openModal(modalWhy);
+      });
+
+      $("modalHelpReload").addEventListener("click", () => {
+        closeModal(modalHelp);
+        softReload();
+      });
+
+      $("modalWhyCopy").addEventListener("click", async () => {
+        await copyDiagnostics();
+        closeModal(modalWhy);
+      });
+
+      // Diagnóstico (botão principal)
+      $("btnCopy").addEventListener("click", copyDiagnostics);
+
+      // Atualização de estado online/offline
+      window.addEventListener("online", () => setConnUI(true));
+      window.addEventListener("offline", () => setConnUI(false));
+
+      // Atualiza relógio/estado na primeira carga
+      timeNow.textContent = formatNow();
+      setConnUI(navigator.onLine);
+
+      setInterval(() => { timeNow.textContent = formatNow(); }, 30_000);
+
+      // opcional: se voltar online, você pode auto-recarregar (comentado por padrão)
+      window.addEventListener("online", () => {
+        setTimeout(() => {
+          if (document.visibilityState === "visible") {
+            // location.reload();
+          }
+        }, 900);
+      });
+    })();
+  </script>
+</body>
+</html>
