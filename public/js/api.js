@@ -1,6 +1,6 @@
 // public/js/api.js
 
-const API_URL = window.__API_URL__ || "http://localhost:3000";
+const API_URL = window.__API_URL__;
 
 const TOKEN_KEY = "token";
 const USER_KEY = "user";
