@@ -1,4 +1,4 @@
-const CACHE_VERSION = "myfinance-v1.0.5"; // atualize quando mudar APP_SHELL
+const CACHE_VERSION = "myfinance-v1.0.7"; // atualize quando mudar APP_SHELL
 const CACHE_NAME = `${CACHE_VERSION}-shell`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 
@@ -38,18 +38,38 @@ const API_PATH_PREFIXES = [
   "/family",
 ];
 
+// API_ORIGINS e carregado dinamicamente via /config.json (server.js)
+let apiOrigins = new Set();
+
+async function loadApiOrigins() {
+  try {
+    const res = await fetch("/config.json", { cache: "no-store" });
+    const data = await res.json();
+    const apiUrl = (data?.apiUrl || "").trim();
+    if (apiUrl) {
+      const origin = new URL(apiUrl).origin;
+      apiOrigins.add(origin);
+    }
+  } catch {
+    // ignore: sem config, segue com fallback
+  }
+}
+
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches
-      .open(CACHE_NAME)
-      .then((cache) => cache.addAll(APP_SHELL))
-      .then(() => self.skipWaiting())
+    (async () => {
+      await loadApiOrigins();
+      const cache = await caches.open(CACHE_NAME);
+      await cache.addAll(APP_SHELL);
+      self.skipWaiting();
+    })()
   );
 });
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     (async () => {
+      await loadApiOrigins();
       const keys = await caches.keys();
       await Promise.all(
         keys.map((k) => (k.startsWith(CACHE_VERSION) ? null : caches.delete(k)))
@@ -66,12 +86,13 @@ self.addEventListener("message", (event) => {
 function isApiRequest(req) {
   const url = new URL(req.url);
 
+  if (apiOrigins.has(url.origin)) return true;
+  // Fallback seguro: se for cross-origin, trata como API (network-only)
+  if (url.origin !== self.location.origin) return true;
+
   if (url.origin === self.location.origin) {
     return API_PATH_PREFIXES.some((p) => url.pathname.startsWith(p));
   }
-
-  // Se sua API estiver em outra origem:
-  // if (url.origin === "https://sua-api.vercel.app") return true;
 
   return false;
 }
