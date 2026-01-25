@@ -118,7 +118,7 @@ Quer contribuir com o MyFinanceApp? Siga estes passos:
    ```
 3. Faça seus commits e abra um *Pull Request*.
 
-> [!INFO]
+> [!NOTE]
 > Mais informações em [CONTRIBUTING](CONTRIBUTING.md)
 
 ---
