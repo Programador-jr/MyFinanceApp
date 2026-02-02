@@ -57,18 +57,30 @@ function applyDefaultFilter() {
 
 async function loadSummary(month, year) {
   try {
-    const data = await apiFetch(`/dashboard/summary?month=${month}&year=${year}`);
+    const [summary, allTransactions] = await Promise.all([
+      apiFetch(`/dashboard/summary?month=${month}&year=${year}`),
+      apiFetch("/transactions")
+    ]);
 
     const formatMoney = (value) => `R$ ${(Number(value) || 0).toFixed(2)}`;
+    const allTransactionsList = Array.isArray(allTransactions?.transactions)
+      ? allTransactions.transactions
+      : Array.isArray(allTransactions)
+        ? allTransactions
+        : [];
+    const overallBalance = allTransactionsList.reduce((acc, t) => {
+      const value = Number(t.value || 0);
+      return acc + (t.type === "income" ? value : -value);
+    }, 0);
 
-    document.getElementById("income").innerText = formatMoney(data.income);
-    document.getElementById("expense").innerText = formatMoney(data.expense);
-    document.getElementById("balance").innerText = formatMoney(data.balance);
+    document.getElementById("income").innerText = formatMoney(summary.income);
+    document.getElementById("expense").innerText = formatMoney(summary.expense);
+    document.getElementById("balance").innerText = formatMoney(overallBalance);
 
     const boxes = document.getElementById("boxes");
     boxes.innerHTML = "";
 
-    (data.boxes || []).forEach((box) => {
+    (summary.boxes || []).forEach((box) => {
       boxes.innerHTML += `
         <div class="col-md-3">
           <div class="card p-3 shadow-sm mb-3">
