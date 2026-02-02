@@ -57,18 +57,26 @@ function applyDefaultFilter() {
 
 async function loadSummary(month, year) {
   try {
-    const data = await apiFetch(`/dashboard/summary?month=${month}&year=${year}`);
+    const [periodResult, overallResult] = await Promise.allSettled([
+      apiFetch(`/dashboard/summary?month=${month}&year=${year}`),
+      apiFetch("/dashboard/summary"),
+    ]);
+    if (periodResult.status !== "fulfilled") {
+      throw periodResult.reason;
+    }
+    const periodData = periodResult.value;
+    const overallData = overallResult.status === "fulfilled" ? overallResult.value : periodData;
 
     const formatMoney = (value) => `R$ ${(Number(value) || 0).toFixed(2)}`;
 
-    document.getElementById("income").innerText = formatMoney(data.income);
-    document.getElementById("expense").innerText = formatMoney(data.expense);
-    document.getElementById("balance").innerText = formatMoney(data.balance);
+    document.getElementById("income").innerText = formatMoney(periodData.income);
+    document.getElementById("expense").innerText = formatMoney(periodData.expense);
+    document.getElementById("balance").innerText = formatMoney(overallData.balance);
 
     const boxes = document.getElementById("boxes");
     boxes.innerHTML = "";
 
-    (data.boxes || []).forEach((box) => {
+    (periodData.boxes || []).forEach((box) => {
       boxes.innerHTML += `
         <div class="col-md-3">
           <div class="card p-3 shadow-sm mb-3">
