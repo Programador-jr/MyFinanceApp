@@ -181,6 +181,27 @@
     </div>
   </div>
 
+  <div class="row mb-4">
+    <div class="col-12 d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3">
+      <h5 class="mb-0"><i class="fa-solid fa-receipt me-2"></i> Contas</h5>
+
+      <button class="btn btn-outline-primary w-sm-auto" data-bs-toggle="modal" data-bs-target="#accountModal">
+        <i class="fa-solid fa-plus me-1"></i> Nova Conta
+      </button>
+    </div>
+
+    <div id="accountsList" class="row row-cols-1 row-cols-lg-2 g-3"></div>
+
+    <div id="emptyAccounts" class="d-none text-center py-4">
+      <i class="fa-solid fa-receipt fa-3x mb-3 text-muted"></i>
+      <h6 class="text-muted">Nenhuma conta registrada</h6>
+      <p class="small text-muted">Adicione uma conta para acompanhar parcelas, juros e vencimentos</p>
+      <button class="btn btn-primary mt-2 w-sm-auto" data-bs-toggle="modal" data-bs-target="#accountModal">
+        <i class="fa-solid fa-plus me-1"></i> Criar Conta
+      </button>
+    </div>
+  </div>
+
   <div class="row mt-4">
     <div class="col-12 col-lg-6 mb-3">
       <div class="card p-4 p-md-3 shadow-sm h-100">
@@ -308,6 +329,85 @@
 
 </div>
 
+<div class="modal fade" id="accountModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fa-solid fa-receipt me-2"></i> Conta</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="accountForm">
+        <div class="modal-body">
+          <input type="hidden" id="accountId">
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label">Nome da conta</label>
+              <input type="text" id="accountName" class="form-control" placeholder="Ex.: Cartão da Loja" required>
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="form-label">Valor principal (R$)</label>
+              <input type="number" id="accountAmount" class="form-control" min="0" step="0.01" required>
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="form-label">Entrada (R$)</label>
+              <input type="number" id="accountEntry" class="form-control" min="0" step="0.01">
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="form-label">Parcelas</label>
+              <input type="number" id="accountInstallments" class="form-control" min="1" step="1">
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="form-label">Juros (%)</label>
+              <input type="number" id="accountInterest" class="form-control" min="0" step="0.01">
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="form-label">Vencimento</label>
+              <input type="date" id="accountDueDate" class="form-control">
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="form-label">Categoria (despesa)</label>
+              <select id="accountCategory" class="form-select">
+                <option value="">Selecionar depois</option>
+              </select>
+            </div>
+            <div class="col-12">
+              <div class="account-total-box p-3 rounded">
+                <div class="d-flex justify-content-between flex-wrap gap-2">
+                  <span class="text-muted">Total calculado</span>
+                  <strong id="accountTotalPreview">R$ 0,00</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="accountCategoryModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fa-solid fa-tag me-2"></i> Escolher categoria</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <label class="form-label">Categoria da conta</label>
+        <select id="accountPayCategory" class="form-select"></select>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="confirmPayCategory">Confirmar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 <script src="/config.js"></script>`r`n  <script src="js/api.js"></script>
 <script src="js/pwa.js"></script>
@@ -325,4 +425,3 @@
 
 </body>
 </html>
-
