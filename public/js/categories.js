@@ -1,23 +1,16 @@
-// public/js/categories.js
-
-/**
- * =========================================================
- * CATEGORIES (Gestão)
- * - checkAuth + initTheme + bindInviteModal (padrão das páginas internas)
- * - Lista categorias (GET /categories)
- * - Cria categoria (POST /categories)
- * - Edita categoria (PUT /categories/:id)  -> se o backend não tiver, vai falhar e avisar
- * - Exclui categoria (DELETE /categories/:id)
- * - Sem onclick: event delegation e binds por addEventListener
- * =========================================================
- */
-
 document.addEventListener("DOMContentLoaded", () => {
   checkAuth();
   initTheme();
   bindInviteModal();
 
   const categoriesTable = document.getElementById("categoriesTable");
+  const categoriesCardsWrap = document.getElementById("categoriesCardsWrap");
+  const categoriesTableWrap = document.getElementById("categoriesTableWrap");
+  const categoriesEmptyState = document.getElementById("categoriesEmptyState");
+  const categoriesViewCardsBtn = document.getElementById("categoriesViewCardsBtn");
+  const categoriesViewTableBtn = document.getElementById("categoriesViewTableBtn");
+  const categoriesCountBadge = document.getElementById("categoriesCountBadge");
+  const categoriesFilterSelect = document.getElementById("categoriesFilterSelect");
 
   const openCreateBtn = document.getElementById("openCreateCategoryBtn");
 
@@ -39,11 +32,55 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Estado
   let categories = [];
+  let filteredCategories = [];
+  let categoriesTypeFilter = "all";
   let editingCategoryId = null;
   let deletingCategoryId = null;
   let editorMode = "create"; // "create" | "edit"
 
-  const typeLabels = { income: "Entrada", expense: "Saída" };
+  const CATEGORIES_VIEW_STORAGE_KEY = "myfinance_categories_view";
+  let categoriesView = loadStoredCategoriesView();
+
+  const typeLabels = { income: "Entrada", expense: "Saida" };
+
+  function normalizeCategoriesView(value) {
+    return value === "table" ? "table" : "cards";
+  }
+
+  function loadStoredCategoriesView() {
+    try {
+      return normalizeCategoriesView(localStorage.getItem(CATEGORIES_VIEW_STORAGE_KEY));
+    } catch (_) {
+      return "cards";
+    }
+  }
+
+  function persistCategoriesView(value) {
+    try {
+      localStorage.setItem(CATEGORIES_VIEW_STORAGE_KEY, normalizeCategoriesView(value));
+    } catch (_) {}
+  }
+
+  function syncCategoriesView() {
+    const showingCards = categoriesView === "cards";
+    const hasItems = filteredCategories.length > 0;
+
+    if (hasItems) {
+      categoriesCardsWrap?.classList.toggle("d-none", !showingCards);
+      categoriesTableWrap?.classList.toggle("d-none", showingCards);
+    }
+
+    categoriesViewCardsBtn?.classList.toggle("is-active", showingCards);
+    categoriesViewCardsBtn?.setAttribute("aria-pressed", showingCards ? "true" : "false");
+    categoriesViewTableBtn?.classList.toggle("is-active", !showingCards);
+    categoriesViewTableBtn?.setAttribute("aria-pressed", !showingCards ? "true" : "false");
+  }
+
+  function setCategoriesView(nextView) {
+    categoriesView = normalizeCategoriesView(nextView);
+    persistCategoriesView(categoriesView);
+    syncCategoriesView();
+  }
 
   function escapeHtml(str) {
     return String(str || "")
@@ -54,69 +91,169 @@ document.addEventListener("DOMContentLoaded", () => {
       .replaceAll("'", "&#039;");
   }
 
-  async function loadCategories() {
-    const data = await apiFetch("/categories");
-    categories = Array.isArray(data) ? data : (data?.categories || []);
-    renderTable();
+  function getCategoryId(category) {
+    return String(category?._id || category?.id || "").trim();
   }
 
-function renderTable() {
-  categoriesTable.innerHTML = "";
+  function getTypeClass(type) {
+    return type === "income" ? "is-income" : "is-expense";
+  }
 
-  categories.forEach((c) => {
-    const typeLabel = typeLabels[c.type] || c.type;
+  function getOriginLabel(category) {
+    if (category?.isFixed) {
+      return '<span class="text-muted">Sistema</span><i class="fa-solid fa-lock ms-1 text-muted" title="Categoria do sistema"></i>';
+    }
 
-    // Categorias fixas: bloqueia editar/excluir (na UI)
-    const canMutate = !c.isFixed;
+    return "Minha";
+  }
 
-    // Origem com cadeado quando for do sistema
-    const originCell = c.isFixed
-      ? `<span class="text-muted">Sistema</span>
-         <i class="fa-solid fa-lock ms-1 text-muted" title="Categoria do sistema"></i>`
-      : `${escapeHtml("Minha")}`;
+  function getActionsHtml(category) {
+    const canMutate = !category?.isFixed;
+    const categoryId = escapeHtml(getCategoryId(category));
 
-    categoriesTable.innerHTML += `
-      <tr>
-        <td>${escapeHtml(c.name)}</td>
-        <td>${escapeHtml(typeLabel)}</td>
-        <td>${originCell}</td>
-<td class="text-end">
-  ${
-    canMutate
-      ? `
-        <button
-          class="btn btn-sm btn-outline-primary me-1"
-          type="button"
-          data-action="edit"
-          data-id="${c._id}"
-          title="Editar"
-        >
-          <i class="fa-solid fa-pen"></i>
-        </button>
-
-        <button
-          class="btn btn-sm btn-outline-danger"
-          type="button"
-          data-action="delete"
-          data-id="${c._id}"
-          title="Excluir"
-        >
-          <i class="fa-solid fa-trash"></i>
-        </button>
-      `
-      : `
+    if (!canMutate || !categoryId) {
+      return `
         <span class="text-muted" title="Categoria do sistema">
           <i class="fa-solid fa-lock"></i>
         </span>
-      `
-  }
-</td>
+      `;
+    }
 
-      </tr>
+    return `
+      <button
+        class="btn btn-sm btn-outline-primary me-1 category-action-btn"
+        type="button"
+        data-action="edit"
+        data-id="${categoryId}"
+        title="Editar"
+      >
+        <i class="fa-solid fa-pen"></i>
+      </button>
+      <button
+        class="btn btn-sm btn-outline-danger category-action-btn"
+        type="button"
+        data-action="delete"
+        data-id="${categoryId}"
+        title="Excluir"
+      >
+        <i class="fa-solid fa-trash"></i>
+      </button>
     `;
-  });
-}
+  }
 
+  async function loadCategories() {
+    const data = await apiFetch("/categories");
+    const list = Array.isArray(data) ? data : (data?.categories || []);
+
+    categories = [...list].sort((a, b) => {
+      if (Boolean(a?.isFixed) !== Boolean(b?.isFixed)) {
+        return a?.isFixed ? 1 : -1;
+      }
+
+      return String(a?.name || "").localeCompare(String(b?.name || ""), "pt-BR", {
+        sensitivity: "base"
+      });
+    });
+
+    applyCategoryFilter();
+  }
+
+  function renderTable() {
+    if (!categoriesTable) return;
+
+    categoriesTable.innerHTML = filteredCategories
+      .map((category) => {
+        const typeLabel = typeLabels[category.type] || category.type || "-";
+
+        return `
+          <tr>
+            <td>${escapeHtml(category.name || "Sem nome")}</td>
+            <td>${escapeHtml(typeLabel)}</td>
+            <td>${getOriginLabel(category)}</td>
+            <td class="text-end">${getActionsHtml(category)}</td>
+          </tr>
+        `;
+      })
+      .join("");
+  }
+
+  function renderCards() {
+    if (!categoriesCardsWrap) return;
+
+    categoriesCardsWrap.innerHTML = filteredCategories
+      .map((category) => {
+        const typeLabel = typeLabels[category.type] || category.type || "-";
+        const typeClass = getTypeClass(category.type);
+        const originLabel = category?.isFixed
+          ? '<span class="category-origin-pill is-system"><i class="fa-solid fa-lock me-1"></i>Sistema</span>'
+          : '<span class="category-origin-pill is-custom"><i class="fa-solid fa-user me-1"></i>Minha</span>';
+
+        return `
+          <div class="col-12 col-md-6 col-xl-4">
+            <article class="category-item-card ${category?.isFixed ? "is-fixed" : "is-custom"}">
+              <div class="category-item-head">
+                <span class="category-type-chip ${typeClass}">${escapeHtml(typeLabel)}</span>
+                ${originLabel}
+              </div>
+
+              <h6 class="category-item-name" title="${escapeHtml(category.name || "Sem nome")}">${escapeHtml(category.name || "Sem nome")}</h6>
+
+              <div class="category-item-footer">
+                <div class="category-item-meta">
+                  <i class="fa-solid fa-tag"></i>
+                  <span>${escapeHtml(category.name || "Sem nome")}</span>
+                </div>
+                <div class="category-item-actions">${getActionsHtml(category)}</div>
+              </div>
+            </article>
+          </div>
+        `;
+      })
+      .join("");
+  }
+
+  function updateCategoriesBadge() {
+    if (!categoriesCountBadge) return;
+    const total = categories.length;
+    const visible = filteredCategories.length;
+    if (visible === total) {
+      categoriesCountBadge.textContent = `${total} categorias`;
+      return;
+    }
+    categoriesCountBadge.textContent = `${visible} de ${total} categorias`;
+  }
+
+  function matchesCategoryFilter(category) {
+    if (categoriesTypeFilter === "all") return true;
+    if (categoriesTypeFilter === "income") return category?.type === "income";
+    if (categoriesTypeFilter === "expense") return category?.type === "expense";
+    if (categoriesTypeFilter === "custom") return !category?.isFixed;
+    if (categoriesTypeFilter === "system") return Boolean(category?.isFixed);
+    return true;
+  }
+
+  function applyCategoryFilter() {
+    categoriesTypeFilter = String(categoriesFilterSelect?.value || "all");
+    filteredCategories = categories.filter(matchesCategoryFilter);
+    updateCategoriesBadge();
+    renderCategories();
+  }
+
+  function renderCategories() {
+    renderTable();
+    renderCards();
+
+    const hasItems = filteredCategories.length > 0;
+    categoriesEmptyState?.classList.toggle("d-none", hasItems);
+
+    if (!hasItems) {
+      categoriesCardsWrap?.classList.add("d-none");
+      categoriesTableWrap?.classList.add("d-none");
+      return;
+    }
+
+    syncCategoriesView();
+  }
 
   function openCreateModal() {
     editorMode = "create";
@@ -134,11 +271,11 @@ function renderTable() {
   }
 
   function openEditModal(categoryId) {
-    const c = categories.find((x) => x._id === categoryId);
-    if (!c) return;
+    const category = categories.find((item) => getCategoryId(item) === categoryId);
+    if (!category) return;
 
-    if (c.isFixed) {
-      showAlert("Categorias do sistema não podem ser editadas.", "warning", "triangle-exclamation");
+    if (category.isFixed) {
+      showAlert("Categorias do sistema nao podem ser editadas.", "warning", "triangle-exclamation");
       return;
     }
 
@@ -148,14 +285,13 @@ function renderTable() {
     editorTitle.textContent = "Editar categoria";
     editorHint.style.display = "none";
 
-    nameInput.value = c.name || "";
-    typeSelect.value = c.type || "expense";
+    nameInput.value = category.name || "";
+    typeSelect.value = category.type || "expense";
 
-    saveEditBtn.disabled = true; // só habilita quando houver mudança + válido
+    saveEditBtn.disabled = true;
     editorModal?.show();
     nameInput.focus();
 
-    // revalida conforme usuário digita
     updateSaveStateForEdit();
   }
 
@@ -166,37 +302,38 @@ function renderTable() {
     };
   }
 
-  function isEditorValid(p) {
-    if (!p.name) return false;
-    if (p.type !== "income" && p.type !== "expense") return false;
+  function isEditorValid(payload) {
+    if (!payload.name) return false;
+    if (payload.type !== "income" && payload.type !== "expense") return false;
     return true;
   }
 
-  function isEditorDirty(p) {
+  function isEditorDirty(payload) {
     if (editorMode !== "edit") return true;
-    const c = categories.find((x) => x._id === editingCategoryId);
-    if (!c) return false;
-    return p.name !== (c.name || "") || p.type !== (c.type || "");
+
+    const category = categories.find((item) => getCategoryId(item) === editingCategoryId);
+    if (!category) return false;
+
+    return payload.name !== (category.name || "") || payload.type !== (category.type || "");
   }
 
   function updateSaveStateForEdit() {
-    const p = getEditorPayload();
-    const canSave = isEditorValid(p) && isEditorDirty(p);
+    const payload = getEditorPayload();
+    const canSave = isEditorValid(payload) && isEditorDirty(payload);
     saveEditBtn.disabled = !canSave;
   }
 
   async function saveCategory() {
-    const p = getEditorPayload();
+    const payload = getEditorPayload();
 
-    if (!isEditorValid(p)) {
+    if (!isEditorValid(payload)) {
       showAlert("Preencha nome e tipo corretamente.", "warning", "triangle-exclamation");
       updateSaveStateForEdit();
       return;
     }
 
-    // Edit mode: bloqueia se não mudou nada
-    if (editorMode === "edit" && !isEditorDirty(p)) {
-      showAlert("Nenhuma alteração detectada.", "warning", "triangle-exclamation");
+    if (editorMode === "edit" && !isEditorDirty(payload)) {
+      showAlert("Nenhuma alteracao detectada.", "warning", "triangle-exclamation");
       updateSaveStateForEdit();
       return;
     }
@@ -205,11 +342,10 @@ function renderTable() {
 
     try {
       if (editorMode === "create") {
-        await apiFetch("/categories", "POST", p);
+        await apiFetch("/categories", "POST", payload);
         showAlert("Categoria criada com sucesso!", "success", "check-circle");
       } else {
-        // OBS: se o seu backend ainda não tiver PUT /categories/:id, vai cair no catch com erro.
-        await apiFetch(`/categories/${editingCategoryId}`, "PUT", p);
+        await apiFetch(`/categories/${editingCategoryId}`, "PUT", payload);
         showAlert("Categoria atualizada com sucesso!", "success", "check-circle");
       }
 
@@ -223,11 +359,11 @@ function renderTable() {
   }
 
   function openDeleteModal(categoryId) {
-    const c = categories.find((x) => x._id === categoryId);
-    if (!c) return;
+    const category = categories.find((item) => getCategoryId(item) === categoryId);
+    if (!category) return;
 
-    if (c.isFixed) {
-      showAlert("Categorias do sistema não podem ser excluídas.", "warning", "triangle-exclamation");
+    if (category.isFixed) {
+      showAlert("Categorias do sistema nao podem ser excluidas.", "warning", "triangle-exclamation");
       return;
     }
 
@@ -243,7 +379,7 @@ function renderTable() {
     try {
       await apiFetch(`/categories/${deletingCategoryId}`, "DELETE");
       deleteModal?.hide();
-      showAlert("Categoria excluída com sucesso!", "success", "check-circle");
+      showAlert("Categoria excluida com sucesso!", "success", "check-circle");
       deletingCategoryId = null;
       await loadCategories();
     } catch (err) {
@@ -253,28 +389,46 @@ function renderTable() {
     }
   }
 
-  // Event delegation da tabela
-  categoriesTable.addEventListener("click", (e) => {
-    const btn = e.target.closest("button[data-action]");
+  function handleActionClick(event) {
+    const btn = event.target.closest("button[data-action]");
     if (!btn) return;
 
     const action = btn.dataset.action;
-    const id = btn.dataset.id;
+    const id = String(btn.dataset.id || "").trim();
+    if (!id) return;
 
     if (action === "edit") openEditModal(id);
     if (action === "delete") openDeleteModal(id);
+  }
+
+  categoriesTable?.addEventListener("click", handleActionClick);
+  categoriesCardsWrap?.addEventListener("click", handleActionClick);
+
+  openCreateBtn?.addEventListener("click", openCreateModal);
+  saveEditBtn?.addEventListener("click", saveCategory);
+  confirmDeleteBtn?.addEventListener("click", confirmDelete);
+
+  nameInput?.addEventListener("input", updateSaveStateForEdit);
+  typeSelect?.addEventListener("change", updateSaveStateForEdit);
+
+  categoriesViewCardsBtn?.addEventListener("click", () => {
+    setCategoriesView("cards");
   });
 
-  // Binds
-  openCreateBtn.addEventListener("click", openCreateModal);
-  saveEditBtn.addEventListener("click", saveCategory);
-  confirmDeleteBtn.addEventListener("click", confirmDelete);
+  categoriesViewTableBtn?.addEventListener("click", () => {
+    setCategoriesView("table");
+  });
 
-  nameInput.addEventListener("input", updateSaveStateForEdit);
-  typeSelect.addEventListener("change", updateSaveStateForEdit);
+  categoriesFilterSelect?.addEventListener("change", applyCategoryFilter);
 
-  // Init
+  setCategoriesView(categoriesView);
+  updateCategoriesBadge();
+
   loadCategories().catch(() => {
-    showAlert("Não foi possível carregar categorias.", "danger", "triangle-exclamation");
+    showAlert("Nao foi possivel carregar categorias.", "danger", "triangle-exclamation");
+    categories = [];
+    filteredCategories = [];
+    renderCategories();
+    updateCategoriesBadge();
   });
 });

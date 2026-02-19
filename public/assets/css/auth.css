@@ -146,7 +146,7 @@
       color: var(--text-light);
       padding: 14px 16px 14px 48px;
       font-size: 1rem;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
     .auth-input:focus {
@@ -197,7 +197,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.3s;
+      transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
     }
     
     .remember-checkbox.checked {
@@ -236,7 +236,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.3s;
+      transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
       margin-top: 3px;
     }
     
@@ -280,7 +280,7 @@
       padding: 16px;
       width: 100%;
       margin-top: 8px;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
       overflow: hidden;
     }
@@ -323,7 +323,7 @@
       text-decoration: none;
       padding: 8px 16px;
       border-radius: 8px;
-      transition: all 0.3s;
+      transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
       margin: 0 4px;
     }
     
@@ -344,7 +344,7 @@
       margin-top: 2rem;
       padding: 10px;
       border-radius: 8px;
-      transition: all 0.3s;
+      transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
     }
     
     .back-link:hover {
@@ -468,9 +468,116 @@
       color: var(--success-color);
     }
     
-    .requirement-text {
-      color: var(--text-muted);
-    }
+.requirement-text {
+  color: var(--text-muted);
+}
+
+/* Modal de termos e privacidade (cadastro) */
+.legal-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1080;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+
+.legal-modal[hidden] {
+  display: none !important;
+}
+
+.legal-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.72);
+  backdrop-filter: blur(2px);
+}
+
+.legal-modal__dialog {
+  position: relative;
+  width: min(760px, 100%);
+  max-height: min(88vh, 760px);
+  background: var(--bg-card-dark);
+  border: 1px solid var(--border-blue);
+  border-radius: 16px;
+  box-shadow: 0 24px 40px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+}
+
+.legal-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-blue);
+  background: linear-gradient(to right, rgba(59, 130, 246, 0.12), rgba(29, 78, 216, 0.08));
+}
+
+.legal-modal__title {
+  margin: 0;
+  color: var(--text-light);
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.legal-modal__close {
+  border: 1px solid var(--border-blue);
+  background: rgba(15, 23, 42, 0.7);
+  color: var(--text-light);
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+}
+
+.legal-modal__close:hover {
+  background: rgba(30, 58, 138, 0.35);
+}
+
+.legal-modal__body {
+  padding: 16px;
+  color: var(--text-muted);
+  font-size: 0.94rem;
+  line-height: 1.6;
+  max-height: calc(min(88vh, 760px) - 72px);
+  overflow-y: auto;
+}
+
+.legal-modal__body p {
+  margin-bottom: 12px;
+}
+
+.legal-modal__body p:last-child {
+  margin-bottom: 0;
+}
+
+[data-bs-theme="light"] .legal-modal__dialog {
+  background: rgba(255, 255, 255, 0.96);
+  border-color: rgba(59, 130, 246, 0.24);
+}
+
+[data-bs-theme="light"] .legal-modal__header {
+  background: linear-gradient(to right, rgba(59, 130, 246, 0.08), rgba(29, 78, 216, 0.06));
+}
+
+[data-bs-theme="light"] .legal-modal__title {
+  color: #0f172a;
+}
+
+[data-bs-theme="light"] .legal-modal__close {
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: rgba(59, 130, 246, 0.24);
+}
+
+[data-bs-theme="light"] .legal-modal__body {
+  color: #475569;
+}
     
     @keyframes bounce {
       0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
@@ -529,3 +636,12 @@
     [data-bs-theme="light"] .link-item:hover {
       background: rgba(59, 130, 246, 0.08);
     }
+
+#alert-container {
+  z-index: 2147483647 !important;
+  pointer-events: none;
+}
+
+#alert-container .alert {
+  pointer-events: auto;
+}

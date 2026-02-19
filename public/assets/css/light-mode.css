@@ -1,0 +1,575 @@
+[data-bs-theme="light"] {
+  --mf-light-bg-start: #f6f8fc;
+  --mf-light-bg-end: #e8edf5;
+  --mf-light-surface: #ffffff;
+  --mf-light-surface-soft: #f8fafd;
+  --mf-light-border: rgba(15, 23, 42, 0.14);
+  --mf-light-border-strong: rgba(15, 23, 42, 0.24);
+  --mf-light-text: #0f172a;
+  --mf-light-muted: #475569;
+  --mf-light-shadow-soft: 0 8px 20px rgba(15, 23, 42, 0.08);
+
+  --bg-dashboard: var(--mf-light-bg-start);
+  --bg-dark: var(--mf-light-bg-start);
+  --bg-card: var(--mf-light-surface);
+  --bg-card-hover: var(--mf-light-surface);
+  --text-light: var(--mf-light-text);
+  --text-muted: var(--mf-light-muted);
+  --border-color: var(--mf-light-border);
+}
+
+[data-bs-theme="light"] body {
+  background: linear-gradient(135deg, var(--mf-light-bg-start) 0%, var(--mf-light-bg-end) 100%) !important;
+  color: var(--mf-light-text) !important;
+}
+
+[data-bs-theme="light"] body::before {
+  background:
+    radial-gradient(circle at 14% 22%, rgba(var(--mf-primary-rgb, 59, 130, 246), 0.08) 0%, transparent 42%),
+    radial-gradient(circle at 86% 78%, rgba(var(--mf-primary-rgb, 59, 130, 246), 0.06) 0%, transparent 42%) !important;
+}
+
+[data-bs-theme="light"] main h1,
+[data-bs-theme="light"] main h2,
+[data-bs-theme="light"] main h3,
+[data-bs-theme="light"] main h4,
+[data-bs-theme="light"] main h5,
+[data-bs-theme="light"] main h6,
+[data-bs-theme="light"] .container h1,
+[data-bs-theme="light"] .container h2,
+[data-bs-theme="light"] .container h3,
+[data-bs-theme="light"] .container h4,
+[data-bs-theme="light"] .container h5,
+[data-bs-theme="light"] .container h6 {
+  color: var(--mf-light-text) !important;
+}
+
+[data-bs-theme="light"] .card,
+[data-bs-theme="light"] #transactionForm,
+[data-bs-theme="light"] #advancedContainer .card,
+[data-bs-theme="light"] .history-filter-card,
+[data-bs-theme="light"] .history-item-card,
+[data-bs-theme="light"] .history-metric-card,
+[data-bs-theme="light"] .category-item-card,
+[data-bs-theme="light"] .contas-card,
+[data-bs-theme="light"] .contas-card-item,
+[data-bs-theme="light"] .contas-stat,
+[data-bs-theme="light"] .family-card,
+[data-bs-theme="light"] .family-stat,
+[data-bs-theme="light"] .family-member-card,
+[data-bs-theme="light"] .settings-profile,
+[data-bs-theme="light"] .settings-info-item,
+[data-bs-theme="light"] .settings-session-card,
+[data-bs-theme="light"] .transaction-latest-card,
+[data-bs-theme="light"] .latest-transactions-card,
+[data-bs-theme="light"] .latest-transaction-item,
+[data-bs-theme="light"] .advanced-summary-card,
+[data-bs-theme="light"] .advanced-ranking-list .advanced-rank-item,
+[data-bs-theme="light"] #comparisonBadge,
+[data-bs-theme="light"] .dashboard-box-metric,
+[data-bs-theme="light"] .dashboard-goal-wrap,
+[data-bs-theme="light"] .dashboard-account-progress,
+[data-bs-theme="light"] .dashboard-account-simple-item,
+[data-bs-theme="light"] .monthly-recurring-income-card,
+[data-bs-theme="light"] .yield-preview,
+[data-bs-theme="light"] .contas-preview,
+[data-bs-theme="light"] .pay-summary,
+[data-bs-theme="light"] .pay-fixed-category,
+[data-bs-theme="light"] .spending-profile-history-item,
+[data-bs-theme="light"] .chart-wrap,
+[data-bs-theme="light"] .chart-placeholder {
+  background: var(--mf-light-surface) !important;
+  border-color: var(--mf-light-border) !important;
+  box-shadow: var(--mf-light-shadow-soft) !important;
+  color: var(--mf-light-text) !important;
+}
+
+[data-bs-theme="light"] .modal:not(.mf-sheet) .modal-content,
+[data-bs-theme="light"] #spendingProfileGroupModal .modal-content {
+  background: var(--mf-light-surface) !important;
+  color: var(--mf-light-text) !important;
+  border-color: var(--mf-light-border) !important;
+  box-shadow: 0 18px 36px rgba(15, 23, 42, 0.16) !important;
+}
+
+[data-bs-theme="light"] .modal-header,
+[data-bs-theme="light"] .modal-footer {
+  border-color: var(--mf-light-border) !important;
+}
+
+[data-bs-theme="light"] .modal-title,
+[data-bs-theme="light"] .modal-body {
+  color: var(--mf-light-text) !important;
+}
+
+[data-bs-theme="light"] .modal-backdrop.show {
+  opacity: 0.64;
+}
+
+[data-bs-theme="light"] .history-view-switch,
+[data-bs-theme="light"] .transactions-view-switch,
+[data-bs-theme="light"] .categories-view-switch,
+[data-bs-theme="light"] .family-view-switch,
+[data-bs-theme="light"] .contas-view-toggle {
+  background: var(--mf-light-surface-soft) !important;
+  border-color: rgba(var(--mf-primary-rgb, 59, 130, 246), 0.32) !important;
+}
+
+[data-bs-theme="light"] .history-view-switch .history-view-btn,
+[data-bs-theme="light"] .transactions-view-switch .transactions-view-btn,
+[data-bs-theme="light"] .categories-view-switch .categories-view-btn,
+[data-bs-theme="light"] .family-view-switch .family-view-btn,
+[data-bs-theme="light"] .contas-view-btn {
+  color: #1e3a8a !important;
+  background: rgba(var(--mf-primary-rgb, 59, 130, 246), 0.08) !important;
+}
+
+[data-bs-theme="light"] .history-view-switch .history-view-btn.is-active,
+[data-bs-theme="light"] .transactions-view-switch .transactions-view-btn.is-active,
+[data-bs-theme="light"] .categories-view-switch .categories-view-btn.is-active,
+[data-bs-theme="light"] .family-view-switch .family-view-btn.is-active,
+[data-bs-theme="light"] .contas-view-btn.active {
+  color: #0f172a !important;
+  background: rgba(var(--mf-primary-rgb, 59, 130, 246), 0.2) !important;
+}
+
+[data-bs-theme="light"] .form-control,
+[data-bs-theme="light"] .form-select,
+[data-bs-theme="light"] .input-group-text {
+  background: #ffffff !important;
+  color: var(--mf-light-text) !important;
+  border-color: var(--mf-light-border-strong) !important;
+}
+
+[data-bs-theme="light"] .form-control::placeholder,
+[data-bs-theme="light"] .form-select::placeholder {
+  color: rgba(71, 85, 105, 0.86) !important;
+}
+
+[data-bs-theme="light"] .form-control:focus,
+[data-bs-theme="light"] .form-select:focus {
+  border-color: rgba(var(--mf-primary-rgb, 59, 130, 246), 0.58) !important;
+  box-shadow: 0 0 0 0.2rem rgba(var(--mf-primary-rgb, 59, 130, 246), 0.16) !important;
+}
+
+[data-bs-theme="light"] .form-label,
+[data-bs-theme="light"] .small,
+[data-bs-theme="light"] .form-text,
+[data-bs-theme="light"] .text-muted {
+  color: var(--mf-light-muted) !important;
+}
+
+[data-bs-theme="light"] .table {
+  --bs-table-color: var(--mf-light-text);
+  --bs-table-bg: transparent;
+  --bs-table-border-color: var(--mf-light-border);
+  color: var(--mf-light-text) !important;
+  background: transparent !important;
+}
+
+[data-bs-theme="light"] .table thead th {
+  color: #1e3a8a !important;
+  background: rgba(var(--mf-primary-rgb, 59, 130, 246), 0.14) !important;
+  border-bottom-color: rgba(var(--mf-primary-rgb, 59, 130, 246), 0.24) !important;
+}
+
+[data-bs-theme="light"] .table td,
+[data-bs-theme="light"] .table th {
+  border-color: var(--mf-light-border) !important;
+  color: var(--mf-light-text) !important;
+}
+
+[data-bs-theme="light"] .table tbody tr:hover {
+  background: rgba(var(--mf-primary-rgb, 59, 130, 246), 0.06) !important;
+}
+
+[data-bs-theme="light"] .list-group,
+[data-bs-theme="light"] .list-group-item {
+  background: transparent !important;
+  color: var(--mf-light-text) !important;
+  border-color: var(--mf-light-border) !important;
+}
+
+[data-bs-theme="light"] .alert {
+  border-color: var(--mf-light-border) !important;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.1) !important;
+  color: var(--mf-light-text) !important;
+}
+
+[data-bs-theme="light"] .empty-state,
+[data-bs-theme="light"] .family-empty,
+[data-bs-theme="light"] .contas-empty,
+[data-bs-theme="light"] .history-empty-state {
+  color: var(--mf-light-muted) !important;
+}
+
+[data-bs-theme="light"] .btn-outline-secondary {
+  color: #334155 !important;
+  border-color: rgba(51, 65, 85, 0.34) !important;
+}
+
+[data-bs-theme="light"] .btn-outline-secondary:hover {
+  color: #0f172a !important;
+  background: rgba(148, 163, 184, 0.2) !important;
+  border-color: rgba(51, 65, 85, 0.5) !important;
+}
+
+[data-bs-theme="light"] .chart-expand-btn,
+[data-bs-theme="light"] .dashboard-mobile-carousel-nav {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border-color: rgba(var(--mf-primary-rgb, 59, 130, 246), 0.36) !important;
+}
+
+[data-bs-theme="light"] .chart-expand-btn:hover,
+[data-bs-theme="light"] .dashboard-mobile-carousel-nav:hover,
+[data-bs-theme="light"] .chart-expand-btn:focus-visible,
+[data-bs-theme="light"] .dashboard-mobile-carousel-nav:focus-visible {
+  background: rgba(var(--mf-primary-rgb, 59, 130, 246), 0.18) !important;
+}
+
+[data-bs-theme="light"] .chart-expandable.is-chart-expanded,
+[data-bs-theme="light"] .chart-expandable:fullscreen {
+  background: #f7f9fc !important;
+}
+
+[data-bs-theme="light"] .monthly-economy-donut-percent,
+[data-bs-theme="light"] .advanced-rank-index,
+[data-bs-theme="light"] .dashboard-account-progress-head strong,
+[data-bs-theme="light"] .dashboard-goal-head strong,
+[data-bs-theme="light"] .dashboard-goal-foot strong,
+[data-bs-theme="light"] .dashboard-box-metric strong {
+  color: #0f172a !important;
+}
+
+[data-bs-theme="light"] .dashboard-mobile-carousel-dot {
+  background: rgba(100, 116, 139, 0.42) !important;
+}
+
+[data-bs-theme="light"] .dashboard-mobile-carousel-dot.is-active {
+  background: rgba(var(--mf-primary-rgb, 59, 130, 246), 0.86) !important;
+}
+
+/* Status and metric contrast */
+[data-bs-theme="light"] .value-positive,
+[data-bs-theme="light"] .yield-positive,
+[data-bs-theme="light"] .history-item-value.is-income,
+[data-bs-theme="light"] .history-metric-card.is-income strong,
+[data-bs-theme="light"] .history-metric-card.is-balance strong.is-positive,
+[data-bs-theme="light"] .latest-transaction-item.is-income .latest-transaction-value,
+[data-bs-theme="light"] .transaction-latest-value.text-success,
+[data-bs-theme="light"] .advanced-rank-item.is-good .advanced-rank-diff,
+[data-bs-theme="light"] .advanced-badge-value.is-good,
+[data-bs-theme="light"] .advanced-rank-diff.is-good {
+  color: #166534 !important;
+}
+
+[data-bs-theme="light"] .value-negative,
+[data-bs-theme="light"] .yield-negative,
+[data-bs-theme="light"] .history-item-value.is-expense,
+[data-bs-theme="light"] .history-metric-card.is-expense strong,
+[data-bs-theme="light"] .history-metric-card.is-balance strong.is-negative,
+[data-bs-theme="light"] .latest-transaction-item.is-expense .latest-transaction-value,
+[data-bs-theme="light"] .transaction-latest-value.text-danger,
+[data-bs-theme="light"] .advanced-rank-item.is-bad .advanced-rank-diff,
+[data-bs-theme="light"] .advanced-badge-value.is-bad,
+[data-bs-theme="light"] .advanced-rank-diff.is-bad {
+  color: #b91c1c !important;
+}
+
+[data-bs-theme="light"] .yield-neutral,
+[data-bs-theme="light"] .advanced-badge-value.is-neutral,
+[data-bs-theme="light"] .advanced-rank-diff.is-neutral {
+  color: #334155 !important;
+}
+
+[data-bs-theme="light"] .monthly-economy-status.is-positive,
+[data-bs-theme="light"] .advanced-trend-chip.is-good {
+  color: #166534 !important;
+  background: rgba(34, 197, 94, 0.14) !important;
+  border-color: rgba(22, 163, 74, 0.34) !important;
+}
+
+[data-bs-theme="light"] .monthly-economy-status.is-negative,
+[data-bs-theme="light"] .advanced-trend-chip.is-bad {
+  color: #b91c1c !important;
+  background: rgba(239, 68, 68, 0.14) !important;
+  border-color: rgba(220, 38, 38, 0.34) !important;
+}
+
+[data-bs-theme="light"] .monthly-economy-status.is-neutral,
+[data-bs-theme="light"] .advanced-trend-chip.is-neutral {
+  color: #334155 !important;
+  background: rgba(148, 163, 184, 0.16) !important;
+  border-color: rgba(100, 116, 139, 0.34) !important;
+}
+
+[data-bs-theme="light"] .monthly-economy-message {
+  color: #475569 !important;
+}
+
+[data-bs-theme="light"] .monthly-economy-message.is-great {
+  color: #166534 !important;
+}
+
+[data-bs-theme="light"] .monthly-economy-message.is-good {
+  color: #1e3a8a !important;
+}
+
+[data-bs-theme="light"] .monthly-economy-message.is-ok {
+  color: #92400e !important;
+}
+
+[data-bs-theme="light"] .monthly-economy-message.is-warning {
+  color: #b91c1c !important;
+}
+
+[data-bs-theme="light"] .dashboard-box-title,
+[data-bs-theme="light"] .dashboard-box-balance,
+[data-bs-theme="light"] .advanced-rank-category,
+[data-bs-theme="light"] .advanced-summary-value,
+[data-bs-theme="light"] .latest-transaction-title,
+[data-bs-theme="light"] .history-item-title,
+[data-bs-theme="light"] .contas-name,
+[data-bs-theme="light"] .family-member-name,
+[data-bs-theme="light"] .category-item-name {
+  color: #0f172a !important;
+}
+
+[data-bs-theme="light"] .dashboard-box-subtitle,
+[data-bs-theme="light"] .dashboard-goal-foot,
+[data-bs-theme="light"] .dashboard-goal-head .label,
+[data-bs-theme="light"] .dashboard-account-progress-head,
+[data-bs-theme="light"] .advanced-summary-label,
+[data-bs-theme="light"] .advanced-summary-sub,
+[data-bs-theme="light"] .advanced-badge-note,
+[data-bs-theme="light"] .advanced-rank-base,
+[data-bs-theme="light"] .advanced-table-meta,
+[data-bs-theme="light"] .latest-transaction-meta,
+[data-bs-theme="light"] .history-item-date,
+[data-bs-theme="light"] .history-page-state,
+[data-bs-theme="light"] #pageInfo,
+[data-bs-theme="light"] .contas-muted,
+[data-bs-theme="light"] .family-member-meta,
+[data-bs-theme="light"] .category-item-meta {
+  color: #475569 !important;
+}
+
+[data-bs-theme="light"] .dashboard-box-chip.is-yield,
+[data-bs-theme="light"] .dashboard-box-chip.is-account-paid {
+  color: #166534 !important;
+  background: rgba(34, 197, 94, 0.14) !important;
+  border-color: rgba(22, 163, 74, 0.34) !important;
+}
+
+[data-bs-theme="light"] .dashboard-box-chip.is-emergency,
+[data-bs-theme="light"] .dashboard-box-chip.is-account-fixed {
+  color: #92400e !important;
+  background: rgba(245, 158, 11, 0.16) !important;
+  border-color: rgba(217, 119, 6, 0.34) !important;
+}
+
+[data-bs-theme="light"] .dashboard-box-chip.is-account-active,
+[data-bs-theme="light"] .dashboard-box-chip.is-account-installment,
+[data-bs-theme="light"] .dashboard-box-chip.is-account-subscription,
+[data-bs-theme="light"] .dashboard-box-chip.is-goal {
+  color: #1e3a8a !important;
+  background: rgba(var(--mf-primary-rgb, 59, 130, 246), 0.14) !important;
+  border-color: rgba(var(--mf-primary-rgb, 59, 130, 246), 0.34) !important;
+}
+
+[data-bs-theme="light"] .dashboard-box-chip.is-goal-done {
+  color: #166534 !important;
+  background: rgba(34, 197, 94, 0.14) !important;
+  border-color: rgba(22, 163, 74, 0.34) !important;
+}
+
+[data-bs-theme="light"] .spending-profile-group-row.is-clickable {
+  background: rgba(var(--mf-primary-rgb, 59, 130, 246), 0.1) !important;
+  border-color: rgba(var(--mf-primary-rgb, 59, 130, 246), 0.28) !important;
+}
+
+[data-bs-theme="light"] .spending-profile-group-row.is-clickable:hover,
+[data-bs-theme="light"] .spending-profile-group-row.is-clickable:focus-visible {
+  background: rgba(var(--mf-primary-rgb, 59, 130, 246), 0.16) !important;
+  border-color: rgba(var(--mf-primary-rgb, 59, 130, 246), 0.38) !important;
+}
+
+[data-bs-theme="light"] .spending-profile-group-open {
+  color: #1e3a8a !important;
+  background: rgba(var(--mf-primary-rgb, 59, 130, 246), 0.14) !important;
+  border-color: rgba(var(--mf-primary-rgb, 59, 130, 246), 0.34) !important;
+}
+
+[data-bs-theme="light"] .transaction-latest-type.is-income,
+[data-bs-theme="light"] .transactions-type-chip.is-income,
+[data-bs-theme="light"] .history-type-badge.is-income,
+[data-bs-theme="light"] .history-type-chip.is-income,
+[data-bs-theme="light"] .category-type-chip.is-income {
+  color: #166534 !important;
+  background: rgba(34, 197, 94, 0.14) !important;
+  border-color: rgba(22, 163, 74, 0.34) !important;
+}
+
+[data-bs-theme="light"] .transaction-latest-type.is-expense,
+[data-bs-theme="light"] .transactions-type-chip.is-expense,
+[data-bs-theme="light"] .history-type-badge.is-expense,
+[data-bs-theme="light"] .history-type-chip.is-expense,
+[data-bs-theme="light"] .category-type-chip.is-expense {
+  color: #b91c1c !important;
+  background: rgba(239, 68, 68, 0.14) !important;
+  border-color: rgba(220, 38, 38, 0.34) !important;
+}
+
+[data-bs-theme="light"] .transaction-origin-pill,
+[data-bs-theme="light"] .history-item-meta-item .history-pill,
+[data-bs-theme="light"] .category-origin-pill.is-custom {
+  color: #166534 !important;
+  background: rgba(34, 197, 94, 0.14) !important;
+  border-color: rgba(22, 163, 74, 0.34) !important;
+}
+
+[data-bs-theme="light"] .category-origin-pill.is-system {
+  color: #334155 !important;
+  background: rgba(148, 163, 184, 0.16) !important;
+  border-color: rgba(100, 116, 139, 0.3) !important;
+}
+
+[data-bs-theme="light"] .latest-transaction-item.is-income .latest-transaction-icon {
+  color: #166534 !important;
+  background: rgba(34, 197, 94, 0.14) !important;
+}
+
+[data-bs-theme="light"] .latest-transaction-item.is-expense .latest-transaction-icon {
+  color: #b91c1c !important;
+  background: rgba(239, 68, 68, 0.14) !important;
+}
+
+[data-bs-theme="light"] .advanced-rank-item.is-good .advanced-rank-meter > span {
+  background: rgba(22, 163, 74, 0.86) !important;
+}
+
+[data-bs-theme="light"] .advanced-rank-item.is-bad .advanced-rank-meter > span {
+  background: rgba(220, 38, 38, 0.86) !important;
+}
+
+[data-bs-theme="light"] .advanced-rank-item.is-neutral .advanced-rank-meter > span {
+  background: rgba(100, 116, 139, 0.86) !important;
+}
+
+[data-bs-theme="light"] .history-metric-card.is-count strong {
+  color: #1e3a8a !important;
+}
+
+/* Period filter (dashboard) */
+[data-bs-theme="light"] .period-bar {
+  background: var(--mf-light-surface) !important;
+  border-color: var(--mf-light-border) !important;
+  box-shadow: var(--mf-light-shadow-soft) !important;
+  backdrop-filter: none;
+}
+
+[data-bs-theme="light"] .period-nav,
+[data-bs-theme="light"] .period-center {
+  background: var(--mf-light-surface-soft) !important;
+  color: var(--mf-light-text) !important;
+  border-color: var(--mf-light-border-strong) !important;
+}
+
+[data-bs-theme="light"] .period-nav:hover,
+[data-bs-theme="light"] .period-center:hover {
+  background: rgba(var(--mf-primary-rgb, 59, 130, 246), 0.12) !important;
+  border-color: rgba(var(--mf-primary-rgb, 59, 130, 246), 0.36) !important;
+}
+
+[data-bs-theme="light"] .period-modal {
+  background: var(--mf-light-surface) !important;
+  color: var(--mf-light-text) !important;
+  border-color: var(--mf-light-border) !important;
+}
+
+[data-bs-theme="light"] .period-select {
+  background: #ffffff !important;
+  color: var(--mf-light-text) !important;
+  border-color: var(--mf-light-border-strong) !important;
+}
+
+/* Preserve mobile sheet theme behavior */
+[data-bs-theme="light"] .mf-sheet .modal-content,
+[data-bs-theme="light"] .mf-sheet-item,
+[data-bs-theme="light"] .mf-sheet-actions button {
+  box-shadow: none !important;
+}
+
+/* Keep status card borders in light mode (same style as dark mode) */
+[data-bs-theme="light"] .alert.alert-success {
+  border-left-color: #22c55e !important;
+}
+
+[data-bs-theme="light"] .alert.alert-danger {
+  border-left-color: #ef4444 !important;
+}
+
+[data-bs-theme="light"] .alert.alert-secondary {
+  border-left-color: #64748b !important;
+}
+
+[data-bs-theme="light"] .history-metric-card.is-income {
+  border-color: rgba(34, 197, 94, 0.4) !important;
+}
+
+[data-bs-theme="light"] .history-metric-card.is-expense {
+  border-color: rgba(239, 68, 68, 0.4) !important;
+}
+
+[data-bs-theme="light"] .transaction-latest-card.is-income {
+  border-left: 4px solid rgba(34, 197, 94, 0.9) !important;
+}
+
+[data-bs-theme="light"] .transaction-latest-card.is-expense {
+  border-left: 4px solid rgba(239, 68, 68, 0.9) !important;
+}
+
+[data-bs-theme="light"] .category-item-card.is-custom {
+  border-left: 4px solid rgba(var(--mf-primary-rgb, 59, 130, 246), 0.88) !important;
+}
+
+[data-bs-theme="light"] .category-item-card.is-fixed {
+  border-left: 4px solid rgba(100, 116, 139, 0.9) !important;
+}
+
+[data-bs-theme="light"] .family-member-card {
+  border-left: 4px solid rgba(var(--family-primary-rgb, 59, 130, 246), 0.88) !important;
+}
+
+[data-bs-theme="light"] #alerts .advanced-alert.is-good {
+  border-left-color: rgba(34, 197, 94, 0.9) !important;
+}
+
+[data-bs-theme="light"] #alerts .advanced-alert.is-bad {
+  border-left-color: rgba(239, 68, 68, 0.9) !important;
+}
+
+[data-bs-theme="light"] #alerts .advanced-alert.is-neutral {
+  border-left-color: rgba(148, 163, 184, 0.7) !important;
+}
+
+[data-bs-theme="light"] .monthly-economy-message.is-great {
+  border-left-color: rgba(34, 197, 94, 0.9) !important;
+}
+
+[data-bs-theme="light"] .monthly-economy-message.is-good {
+  border-left-color: rgba(var(--mf-primary-rgb, 59, 130, 246), 0.9) !important;
+}
+
+[data-bs-theme="light"] .monthly-economy-message.is-ok {
+  border-left-color: rgba(245, 158, 11, 0.85) !important;
+}
+
+[data-bs-theme="light"] .monthly-economy-message.is-warning {
+  border-left-color: rgba(239, 68, 68, 0.88) !important;
+}
+
+[data-bs-theme="light"] .monthly-economy-message.is-neutral {
+  border-left-color: rgba(148, 163, 184, 0.45) !important;
+}

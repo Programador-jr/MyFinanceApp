@@ -24,7 +24,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // UI elements
   const submitBtn = document.getElementById("submitBtn");
-  const passwordStrength = document.getElementById("passwordStrength");
+  const strengthFill = document.getElementById("strengthFill");
+  const strengthText = document.getElementById("strengthText");
   const passwordMatch = document.getElementById("passwordMatch");
 
   const togglePassword = document.getElementById("togglePassword");
@@ -36,6 +37,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const reqLength = document.getElementById("reqLength");
   const reqLetter = document.getElementById("reqLetter");
   const reqNumber = document.getElementById("reqNumber");
+
+  const legalModal = document.getElementById("legalModal");
+  const legalModalTitle = document.getElementById("legalModalTitle");
+  const legalModalBody = document.getElementById("legalModalBody");
+  const legalTermsContent = document.getElementById("legalTermsContent");
+  const legalPrivacyContent = document.getElementById("legalPrivacyContent");
+  const legalLinks = document.querySelectorAll(".terms-link[data-legal]");
+  const legalCloseControls = document.querySelectorAll("[data-legal-close]");
 
   // Estado inicial: botão desabilitado até validar
   if (submitBtn) submitBtn.disabled = true;
@@ -59,14 +68,35 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  function openLegalModal(type) {
+    if (!legalModal || !legalModalTitle || !legalModalBody) return;
+
+    if (type === "privacy") {
+      legalModalTitle.textContent = "Pol\u00edtica de Privacidade";
+      legalModalBody.innerHTML = legalPrivacyContent?.innerHTML || "";
+    } else {
+      legalModalTitle.textContent = "Termos de Uso";
+      legalModalBody.innerHTML = legalTermsContent?.innerHTML || "";
+    }
+
+    legalModal.hidden = false;
+    legalModal.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeLegalModal() {
+    if (!legalModal) return;
+    legalModal.hidden = true;
+    legalModal.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+  }
+
   function updateRequirementIcon(el, ok) {
     if (!el) return;
 
-    // Mantém compatível com seu CSS atual (ícones do FontAwesome)
-    el.classList.remove("fa-circle", "fa-check-circle", "text-secondary", "text-success");
-
-    if (ok) el.classList.add("fa-check-circle", "text-success");
-    else el.classList.add("fa-circle", "text-secondary");
+    el.classList.toggle("valid", ok);
+    el.classList.toggle("fa-circle", !ok);
+    el.classList.toggle("fa-check-circle", ok);
   }
 
   function validatePasswordRules(password) {
@@ -81,20 +111,18 @@ document.addEventListener("DOMContentLoaded", () => {
     // força simples: 0..3
     const score = [hasMinLength, hasUpperCase, hasNumber].filter(Boolean).length;
 
-    if (passwordStrength) {
-      if (!password) {
-        passwordStrength.textContent = "";
-        passwordStrength.className = "mt-2";
-      } else if (score === 1) {
-        passwordStrength.textContent = "Senha fraca";
-        passwordStrength.className = "mt-2 text-danger";
-      } else if (score === 2) {
-        passwordStrength.textContent = "Senha média";
-        passwordStrength.className = "mt-2 text-warning";
-      } else {
-        passwordStrength.textContent = "Senha forte";
-        passwordStrength.className = "mt-2 text-success";
-      }
+    if (strengthFill) {
+      strengthFill.className = "strength-fill";
+      if (score === 1) strengthFill.classList.add("weak");
+      if (score === 2) strengthFill.classList.add("medium");
+      if (score === 3) strengthFill.classList.add("strong");
+    }
+
+    if (strengthText) {
+      if (!password) strengthText.textContent = "Digite uma senha";
+      else if (score === 1) strengthText.textContent = "Senha fraca";
+      else if (score === 2) strengthText.textContent = "Senha média";
+      else strengthText.textContent = "Senha forte";
     }
 
     return { hasMinLength, hasUpperCase, hasNumber, isPasswordValid: score === 3 };
@@ -170,9 +198,29 @@ document.addEventListener("DOMContentLoaded", () => {
   bindToggle(togglePassword, passwordInput);
   bindToggle(toggleConfirmPassword, confirmPasswordInput);
 
+  legalLinks.forEach((link) => {
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      openLegalModal(link.dataset.legal);
+    });
+  });
+
+  legalCloseControls.forEach((btn) => {
+    btn.addEventListener("click", closeLegalModal);
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && legalModal && !legalModal.hidden) {
+      closeLegalModal();
+    }
+  });
+
   // Clique no container alterna a checkbox (mantendo seu padrão visual)
   if (termsCheck && termsCheckbox) {
-    termsCheck.addEventListener("click", () => {
+    termsCheck.addEventListener("click", (event) => {
+      const target = event.target;
+      if (target instanceof Element && target.closest(".terms-link")) return;
       termsCheckbox.classList.toggle("checked");
       validateAll();
     });

@@ -7,9 +7,9 @@
   "lang": "pt-BR",
   "start_url": "/index.html?source=pwa",
   "display": "standalone",
-  "orientation": "any",
-  "theme_color": "#111111",
-  "background_color": "#111111",
+  "orientation": "portrait",
+  "theme_color": "#00bfff",
+  "background_color": "#000000",
   "categories": ["finance", "productivity"],
   "icons": [
     {
@@ -78,10 +78,10 @@
       "icons": [{ "src": "/assets/icons/icon-192.png", "sizes": "192x192" }]
     },
     {
-      "name": "Categorias",
-      "short_name": "Categorias",
-      "description": "Abrir categorias",
-      "url": "/categories.html",
+      "name": "Contas",
+      "short_name": "Contas",
+      "description": "Abrir contas",
+      "url": "/contas.html",
       "icons": [{ "src": "/assets/icons/icon-192.png", "sizes": "192x192" }]
     }
   ]

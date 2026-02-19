@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="pt-br" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#111111">
+  <link rel="apple-touch-icon" href="/assets/icons/icon-192.png">
+  <title>MyFinance - Configurações</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+  <link href="assets/css/navbar.css" rel="stylesheet" />
+  <link href="assets/css/settings.css" rel="stylesheet" />
+  <link href="assets/css/light-mode.css" rel="stylesheet" />
+</head>
+
+<body>
+  <div id="loadNavbar"></div>
+
+  <div
+    id="alert-container"
+    class="position-fixed top-0 start-50 translate-middle-x mt-3"
+    style="z-index: 1055; width: 90%; max-width: 420px;"
+  ></div>
+
+  <div class="modal fade" id="logoutConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="fa-solid fa-right-from-bracket text-danger me-2"></i>
+            Confirmar saída
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <p>Tem certeza que deseja sair do MyFinance?</p>
+          <p class="text-muted small">Você será desconectado e redirecionado para a página de login.</p>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-success" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-danger" id="confirmLogout">Sair</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main class="container-xxl py-3 py-md-4">
+    <div class="mb-4">
+      <h3 class="mb-1">
+        <i class="fa-solid fa-gear me-2"></i>Configurações
+      </h3>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-12 col-lg-5">
+        <section class="card settings-card h-100">
+          <div class="card-body p-4">
+            <h5 class="settings-title mb-3">Conta</h5>
+
+            <div class="settings-profile">
+              <img id="settingsAvatarImg" class="settings-avatar-img d-none" alt="Avatar" />
+              <span id="settingsAvatarFallback" class="settings-avatar-fallback">U</span>
+
+              <div class="flex-grow-1">
+                <div class="settings-profile-name" id="settingsProfileName">Usuário</div>
+                <div class="settings-profile-email" id="settingsProfileEmail">-</div>
+              </div>
+
+              <span class="settings-avatar-badge" id="settingsAvatarBadge"></span>
+            </div>
+
+            <div class="d-grid gap-2 mt-4">
+              <button class="btn btn-outline-primary settings-action-btn" type="button" data-profile-open="name">
+                <i class="fa-solid fa-user-pen me-2"></i>Alterar nome
+              </button>
+
+              <button class="btn btn-outline-primary settings-action-btn" type="button" data-profile-open="avatar">
+                <i class="fa-solid fa-image me-2"></i>Alterar foto de perfil
+              </button>
+            </div>
+
+            <h6 class="settings-subtitle mt-4 mb-2">Ações da conta</h6>
+            <div class="d-grid gap-2">
+              <button
+                class="btn btn-outline-warning settings-action-btn"
+                id="openChangePasswordBtn"
+                data-bs-toggle="modal"
+                data-bs-target="#changePasswordModal"
+                type="button"
+              >
+                <i class="fa-solid fa-key me-2"></i>Alterar senha
+              </button>
+
+              <button
+                class="btn btn-outline-danger settings-action-btn"
+                id="openDeleteAccountBtn"
+                data-bs-toggle="modal"
+                data-bs-target="#deleteAccountModal"
+                type="button"
+              >
+                <i class="fa-solid fa-user-xmark me-2"></i>Excluir conta
+              </button>
+            </div>
+
+            <hr class="my-4" />
+
+            <h6 class="settings-subtitle mb-2">Informações do usuário</h6>
+            <div class="settings-info-grid">
+              <div class="settings-info-item">
+                <span class="label">ID do usuário</span>
+                <strong id="settingsInfoUserId" class="settings-ellipsis">-</strong>
+              </div>
+
+              <div class="settings-info-item">
+                <span class="label">Email</span>
+                <strong id="settingsInfoEmail" class="settings-ellipsis">-</strong>
+              </div>
+
+              <div class="settings-info-item">
+                <span class="label">Família</span>
+                <strong id="settingsInfoFamilyId" class="settings-ellipsis">-</strong>
+              </div>
+
+              <div class="settings-info-item">
+                <span class="label">Membro desde</span>
+                <strong id="settingsInfoCreatedAt" class="settings-ellipsis">-</strong>
+              </div>
+
+              <div class="settings-info-item settings-info-item-full">
+                <span class="label">Status do email</span>
+                <div class="settings-email-status">
+                  <strong id="settingsInfoEmailVerified" class="settings-email-badge is-pending">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <span>Pendente</span>
+                  </strong>
+
+                  <button class="btn btn-sm btn-outline-primary d-none" id="resendVerificationBtn" type="button">
+                    <i class="fa-solid fa-paper-plane me-1"></i>Reenviar link
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="col-12 col-lg-7">
+        <section class="card settings-card h-100">
+          <div class="card-body p-4">
+            <h5 class="settings-title mb-3">Aparência</h5>
+
+            <div class="mb-3">
+              <label class="form-label">Cor do perfil</label>
+              <div class="d-flex gap-2 profile-color-picker" id="settingsColorPicker">
+                <button class="profile-color" type="button" data-color="blue" title="Azul"></button>
+                <button class="profile-color" type="button" data-color="purple" title="Roxo"></button>
+                <button class="profile-color" type="button" data-color="yellow" title="Amarelo"></button>
+                <button class="profile-color" type="button" data-color="red" title="Vermelho"></button>
+                <button class="profile-color" type="button" data-color="mint" title="#00FA9A"></button>
+                <button class="profile-color" type="button" data-color="spring" title="#00FF7F"></button>
+                <button class="profile-color" type="button" data-color="magenta" title="#D02090"></button>
+              </div>
+            </div>
+
+            <hr class="my-4" />
+
+            <div>
+              <label class="form-label d-block">Tema do app</label>
+              <div class="settings-theme-grid">
+                <button class="settings-theme-btn theme-option" data-theme="system" type="button">
+                  <span class="icon"><i class="fa-solid fa-display"></i></span>
+                  <span class="text">
+                    <strong>Sistema</strong>
+                    <small>Acompanha o dispositivo</small>
+                  </span>
+                </button>
+
+                <button class="settings-theme-btn theme-option" data-theme="dark" type="button">
+                  <span class="icon"><i class="fa-solid fa-moon"></i></span>
+                  <span class="text">
+                    <strong>Escuro</strong>
+                    <small>Mais conforto no noturno</small>
+                  </span>
+                </button>
+
+                <button class="settings-theme-btn theme-option" data-theme="light" type="button">
+                  <span class="icon"><i class="fa-solid fa-sun"></i></span>
+                  <span class="text">
+                    <strong>Claro</strong>
+                    <small>Visual limpo e objetivo</small>
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="col-12">
+        <section class="card settings-card settings-session-card">
+          <div class="card-body p-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+            <div>
+              <h5 class="settings-title mb-1">Sessão</h5>
+              <p class="text-muted mb-0 settings-session-text">Finalize seu acesso neste dispositivo com segurança.</p>
+            </div>
+
+            <button
+              class="btn btn-danger"
+              data-bs-toggle="modal"
+              data-bs-target="#logoutConfirmModal"
+              type="button"
+            >
+              <i class="fa-solid fa-right-from-bracket me-2"></i>Sair da conta
+            </button>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="fa-solid fa-key text-warning me-2"></i>Alterar senha
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Senha atual</label>
+            <input id="currentPasswordInput" class="form-control" type="password" autocomplete="current-password" />
+            <div class="mt-2">
+              <button
+                id="forgotPasswordSettingsBtn"
+                class="btn btn-link p-0 settings-forgot-password-btn"
+                type="button"
+              >
+                Não lembra a senha? Redefinir senha
+              </button>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Nova senha</label>
+            <input id="newPasswordInput" class="form-control" type="password" autocomplete="new-password" />
+            <div class="form-text">
+              Mínimo 8 caracteres, pelo menos uma letra maiúscula e um número.
+            </div>
+          </div>
+
+          <div>
+            <label class="form-label">Confirmar nova senha</label>
+            <input id="confirmNewPasswordInput" class="form-control" type="password" autocomplete="new-password" />
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
+          <button class="btn btn-warning" id="saveNewPasswordBtn" type="button">
+            <i class="fa-solid fa-check me-2"></i>Salvar senha
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="fa-solid fa-triangle-exclamation text-danger me-2"></i>Excluir conta
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <p class="mb-2">Esta ação é permanente e não pode ser desfeita.</p>
+          <p class="text-muted small mb-3">
+            Se você for o owner de uma família com outros membros, remova os membros antes de excluir sua conta.
+          </p>
+
+          <div class="mb-3">
+            <label class="form-label">Confirme sua senha</label>
+            <input id="deleteAccountPasswordInput" class="form-control" type="password" autocomplete="current-password" />
+          </div>
+
+          <div>
+            <label class="form-label">Digite EXCLUIR para confirmar</label>
+            <input id="deleteAccountConfirmInput" class="form-control text-uppercase" type="text" placeholder="EXCLUIR" />
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
+          <button class="btn btn-danger" id="confirmDeleteAccountBtn" type="button">
+            <i class="fa-solid fa-user-xmark me-2"></i>Excluir conta
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/pwa.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/idleLogout.js"></script>
+  <script src="js/loadNavbar.js"></script>
+  <script src="js/profileMenu.js"></script>
+  <script src="js/settings.js"></script>
+</body>
+</html>
+
+

@@ -12,6 +12,7 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
   <link href="assets/css/navbar.css" rel="stylesheet" />
   <link href="assets/css/transactions.css" rel="stylesheet" />
+  <link href="assets/css/light-mode.css" rel="stylesheet" />
 </head>
 
 <body>
@@ -23,7 +24,6 @@
     style="z-index: 1055; width: 90%; max-width: 420px;"
   ></div>
 
-  <!-- MODAL CONFIRMAR LOGOUT -->
   <div class="modal fade" id="logoutConfirmModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
@@ -64,7 +64,7 @@
 
         <div class="col-12 col-md-3">
           <label class="form-label">Valor</label>
-          <input type="number" step="0.01" class="form-control" id="value" required />
+          <input type="text" inputmode="decimal" autocomplete="off" class="form-control" id="value" data-money-mask="brl" required />
         </div>
 
         <div class="col-12 col-md-3">
@@ -73,7 +73,7 @@
         </div>
 
         <div class="col-12 col-md-3 d-flex align-items-end">
-          <button type="button" class="btn btn-outline-primary " id="openCategoryBtn">
+          <button type="button" class="btn btn-outline-primary btn-cta-gradient" id="openCategoryBtn">
             Nova Categoria
           </button>
         </div>
@@ -94,17 +94,11 @@
         </div>
 
         <div class="col-12 text-end">
-          <button class="btn-outline-success btn-success  w-sm-auto" type="submit">
+          <button class="btn-outline-success btn-success w-sm-auto" type="submit">
             <i class="fa-solid fa-plus"></i> Salvar
           </button>
         </div>
       </form>
-    </div>
-
-    <div class="row g-3 mb-3">
-      <div class="col-12 col-md-3">
-        <input type="month" class="form-control" id="monthFilter" />
-      </div>
     </div>
 
     <div class="row g-3 mb-4">
@@ -131,28 +125,62 @@
     </div>
 
     <div class="card p-4 shadow-sm">
-      <h5>Histórico</h5>
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+        <h5 class="mb-0">Últimos 5 lançamentos</h5>
+        <div class="d-flex flex-wrap align-items-center gap-2">
+          <div class="btn-group transactions-view-switch" role="group" aria-label="Modo de visualização">
+            <button
+              id="transactionsViewCardsBtn"
+              type="button"
+              class="btn btn-outline-primary transactions-view-btn"
+              aria-pressed="true"
+            >
+              <i class="fa-solid fa-table-cells-large me-1"></i>
+              Cards
+            </button>
+            <button
+              id="transactionsViewTableBtn"
+              type="button"
+              class="btn btn-outline-primary transactions-view-btn"
+              aria-pressed="false"
+            >
+              <i class="fa-solid fa-table me-1"></i>
+              Tabela
+            </button>
+          </div>
+          <a href="history.html" class="btn btn-outline-primary btn-sm btn-cta-gradient">
+            <i class="fa-solid fa-clock-rotate-left me-1"></i>
+            Ver histórico completo
+          </a>
+        </div>
+      </div>
 
-      <div class="table-responsive">
-        <table class="table table-striped mt-3 mb-0">
+      <div id="latestTransactionsCards" class="row g-3"></div>
+
+      <div id="latestTransactionsTableWrap" class="table-responsive d-none">
+        <table class="table align-middle mb-0">
           <thead>
             <tr>
               <th>Data</th>
               <th>Tipo</th>
               <th>Categoria</th>
               <th>Grupo</th>
-              <th>Valor</th>
               <th>Membro</th>
-              <th>Ações</th>
+              <th class="text-end">Valor</th>
+              <th class="text-end">Ações</th>
             </tr>
           </thead>
-          <tbody id="transactionsTable"></tbody>
+          <tbody id="latestTransactionsTableBody"></tbody>
         </table>
+      </div>
+
+      <div id="transactionsEmptyState" class="empty-state d-none">
+        <i class="fa-solid fa-receipt"></i>
+        <h6>Nenhum lançamento recente</h6>
       </div>
     </div>
   </div>
 
-  <!-- MODAL EDITAR -->
   <div class="modal fade" id="editTransactionModal" tabindex="-1">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -172,7 +200,7 @@
 
           <div class="mb-2">
             <label class="form-label">Valor</label>
-            <input type="number" class="form-control" id="editValue" />
+            <input type="text" inputmode="decimal" autocomplete="off" class="form-control" id="editValue" data-money-mask="brl" />
           </div>
 
           <div class="mb-2">
@@ -206,7 +234,6 @@
     </div>
   </div>
 
-  <!-- MODAL CONFIRMAR EXCLUSÃO -->
   <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
@@ -230,7 +257,6 @@
     </div>
   </div>
 
-  <!-- MODAL NOVA CATEGORIA -->
   <div class="modal fade" id="categoryModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
@@ -265,7 +291,8 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="/config.js"></script>`r`n  <script src="js/api.js"></script>
+  <script src="/config.js"></script>
+  <script src="js/api.js"></script>
   <script src="js/pwa.js"></script>
   <script src="js/utils.js"></script>
   <script src="js/idleLogout.js"></script>
@@ -274,4 +301,3 @@
   <script src="js/profileMenu.js"></script>
 </body>
 </html>
-

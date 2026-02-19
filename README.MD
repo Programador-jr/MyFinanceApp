@@ -19,8 +19,8 @@
 <br/>
 
 <!-- Card com estatísticas do repositório -->
-<a href="https://github-readme-stats.vercel.app/api/pin/?username=Programador-jr&repo=MyFinanceApp&theme=tokyonight">
-  <img alt="Repo Card" src="https://github-readme-stats.vercel.app/api/pin/?username=Programador-jr&repo=MyFinanceApp&theme=tokyonight" />
+<a href="https://github-readme-stats.vercel.app/api/pin/?username=Programador-jr&repo=MyFinanceApp&theme=react">
+  <img alt="Repo Card" src="https://github-readme-stats.vercel.app/api/pin/?username=Programador-jr&repo=MyFinanceApp&theme=react" />
 </a>
 
 </div>

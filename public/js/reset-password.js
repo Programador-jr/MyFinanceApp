@@ -1,15 +1,3 @@
-// public/js/reset-password.js
-
-/**
- * =========================================================
- * RESET PASSWORD
- * - Lê token da URL (?token=...)
- * - Valida senha + confirmação
- * - Atualiza UI (força, requisitos, match, toggle eye)
- * - Faz POST /auth/reset-password
- * =========================================================
- */
-
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("resetForm");
   if (!form) return;

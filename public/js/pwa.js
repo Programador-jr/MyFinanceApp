@@ -1,4 +1,3 @@
-// public/js/pwa.js
 (() => {
   const SW_URL = "/sw.js";
   const APP_NAME = "MyFinance";
@@ -130,7 +129,7 @@
     const goOffline = async () => {
       if (window.location.pathname.endsWith("/offline.html")) return;
       if (navigator.onLine) return;
-      // Evita re-renderizar offline.html em loop na mesma sessao
+      // Evita re-renderizar offline.html em loop na mesma sessão
       if (window.__offlineRendered) return;
       try {
         sessionStorage.setItem(LAST_URL_KEY, window.location.href);
@@ -140,7 +139,7 @@
         if ("caches" in window) {
           const cached = await caches.match("/offline.html", { ignoreSearch: true });
           if (cached) {
-            // Renderiza a pagina offline direto do cache para evitar tela padrao do navegador
+            // Renderiza a página offline direto do cache para evitar tela padrão do navegador
             const html = await cached.text();
             window.__offlineRendered = true;
             history.replaceState(null, "", "/offline.html");
@@ -203,7 +202,7 @@
           </div>
           <div class="pwa-install-card__actions">
             <button class="pwa-btn pwa-btn--primary" data-action="install">Instalar</button>
-            <button class="pwa-btn pwa-btn--ghost" data-action="dismiss">Agora nao</button>
+            <button class="pwa-btn pwa-btn--ghost" data-action="dismiss">Agora não</button>
           </div>
           <div class="pwa-install-card__hint">
             No iPhone: toque em Compartilhar e escolha "Adicionar a Tela de Inicio".
@@ -278,7 +277,7 @@
 
         nw.addEventListener("statechange", () => {
           if (nw.state === "installed") {
-            // Garante que o offline.html esteja no cache para renderizacao imediata
+            // Garante que o offline.html esteja no cache para renderização imediata
             if ("caches" in window) {
               caches.open("offline-precache").then((cache) => {
                 cache.add("/offline.html").catch(() => {});

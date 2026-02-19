@@ -1,15 +1,3 @@
-// public/js/auth.js
-
-/**
- * =========================================================
- * LOGIN (index.html)
- * - Toggle de senha
- * - "Lembrar usuário" (salva apenas o email em localStorage)
- * - Submit real via /auth/login
- * - Salva { token, user } retornados pelo backend
- * =========================================================
- */
-
 document.addEventListener("DOMContentLoaded", () => {
   const isStandalone =
     window.matchMedia("(display-mode: standalone)").matches ||

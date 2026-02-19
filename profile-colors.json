@@ -1,0 +1,12 @@
+{
+  "default": "blue",
+  "colors": [
+    { "key": "blue", "label": "Azul", "hex": "#3b82f6" },
+    { "key": "purple", "label": "Roxo", "hex": "#4a24a3" },
+    { "key": "yellow", "label": "Amarelo", "hex": "#f59e0b" },
+    { "key": "red", "label": "Vermelho", "hex": "#ef4444" },
+    { "key": "mint", "label": "#057918", "hex": "#057918" },
+    { "key": "spring", "label": "#00FF7F", "hex": "#00FF7F" },
+    { "key": "magenta", "label": "#D02090", "hex": "#D02090" }
+  ]
+}

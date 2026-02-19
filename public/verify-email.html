@@ -12,24 +12,21 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
   <link href="assets/css/theme.css" rel="stylesheet">
   <link href="assets/css/auth.css" rel="stylesheet">
+  <link href="assets/css/light-mode.css" rel="stylesheet">
 </head>
 
 <body>
-  <!-- Alert Container -->
   <div id="alert-container"
        class="position-fixed top-0 start-50 translate-middle-x mt-3"
        style="z-index: 1055; width: 90%; max-width: 420px;">
   </div>
 
-  <!-- Container Principal (Bootstrap) -->
   <main class="min-vh-100 d-flex align-items-center py-4">
     <div class="container">
       <div class="row justify-content-center">
         <div class="col-12 col-sm-10 col-md-7 col-lg-5">
-          <!-- Mantém sua estrutura (auth-container/auth-card), mas com espaçamento melhor -->
-          <div class="auth-container p-0">
             <div class="auth-card p-4 p-sm-5">
-              <!-- Cabeçalho -->
+
               <div class="auth-header text-center">
                 <div class="logo-main">
                   <i class="fa-solid fa-envelope-circle-check"></i> MyFinance
@@ -37,9 +34,8 @@
                 <p class="logo-subtitle mb-0" id="pageSubtitle">Verificação de email</p>
               </div>
 
-              <!-- Corpo da página -->
               <div class="auth-body mt-4">
-                <!-- Status da verificação -->
+
                 <div id="verification-status" class="text-center">
                   <div class="verification-icon mb-3">
                     <i class="fa-solid fa-circle-notch fa-spin fa-3x" id="statusIcon" style="color: var(--primary-blue);"></i>
@@ -48,7 +44,6 @@
                   <p id="status" class="text-muted mb-0">Aguarde enquanto verificamos seu token...</p>
                 </div>
 
-                <!-- Container para reenvio (inicialmente oculto) -->
                 <div id="resend-container" class="d-none mt-3">
                   <div class="instruction-text mb-4 text-center" style="color: var(--text-muted);">
                     <i class="fa-solid fa-info-circle me-2"></i>
@@ -75,17 +70,20 @@
                   </div>
                 </div>
               </div>
-            </div><!-- /auth-card -->
-          </div><!-- /auth-container -->
-        </div><!-- /col -->
-      </div><!-- /row -->
-    </div><!-- /container -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </main>
 
-  <script src="/config.js"></script>`r`n  <script src="js/api.js"></script>
+  <script src="/config.js"></script>
+  <script src="js/api.js"></script>
   <script src="js/pwa.js"></script>
   <script src="js/utils.js"></script>
   <script src="js/verify-email.js"></script>
 </body>
 </html>
+
+
 

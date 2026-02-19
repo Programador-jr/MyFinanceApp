@@ -14,8 +14,8 @@
   <link href="assets/css/navbar.css" rel="stylesheet">
   <link href="assets/css/dashboard.css" rel="stylesheet">
   <link href="assets/css/periodFilter.css" rel="stylesheet">
+  <link href="assets/css/light-mode.css" rel="stylesheet">
 </head>
-
 <body>
 
 <div id="loadNavbar"></div>
@@ -96,10 +96,10 @@
       </div>
 
       <div class="modal-footer border-0 d-flex justify-content-between">
-        <button type="button" class="btn btn-link text-secondary" id="clearPeriod">LIMPAR</button>
+        <button type="button" class="btn btn-warning" id="clearPeriod">LIMPAR</button>
         <div class="d-flex gap-2">
-          <button type="button" class="btn btn-link text-secondary" data-bs-dismiss="modal">CANCELAR</button>
-          <button type="button" class="btn btn-primary" id="setPeriod">DEFINIR</button>
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal">CANCELAR</button>
+          <button type="button" class="btn btn-success" id="setPeriod">DEFINIR</button>
         </div>
       </div>
     </div>
@@ -109,7 +109,9 @@
 <div class="container-xxl py-3 py-md-4">
   <div class="col-12 mb-3">
     <div class="row align-items-center g-2">
-      <div class="col-12 col-sm-8 col-md-6 col-lg-5">
+      <div class="d-none d-lg-block col-lg-3"></div>
+
+      <div class="col-12 col-md-8 col-lg-6 mx-auto mx-lg-0">
         <div class="period-bar d-flex align-items-center justify-content-between">
           <button type="button" class="period-nav" id="prevPeriod" aria-label="Mês anterior">
             <i class="fa-solid fa-chevron-left"></i>
@@ -123,11 +125,11 @@
           <button type="button" class="period-nav" id="nextPeriod" aria-label="Próximo mês">
             <i class="fa-solid fa-chevron-right"></i>
           </button>
+          
         </div>
       </div>
 
-      <div class="col-12 col-sm-4 col-md-6 col-lg-7 d-flex align-items-center">
-        <small class="text-muted d-none d-md-block">Filtros aplicados ao mês selecionado</small>
+      <div class="col-12 col-lg-3 d-flex align-items-center justify-content-center justify-content-lg-start">
       </div>
 
       <div class="d-none">
@@ -154,38 +156,88 @@
 
     <div class="col-12 col-md-4">
       <div class="alert alert-secondary p-4 p-md-3 shadow-sm h-100">
-        <i class="fa-solid fa-scale-balanced me-2"></i> Saldo
+        <i class="fa-solid fa-scale-balanced me-2"></i> Saldo liquido
         <div id="balance" class="fs-4 fw-semibold">R$ 0,00</div>
       </div>
     </div>
   </div>
 
-  <div class="row mb-4">
+  <div class="row mb-4" id="boxesSection">
     <div class="col-12 d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3">
       <h5 class="mb-0"><i class="fa-solid fa-piggy-bank me-2"></i> Caixinhas</h5>
 
-      <a href="boxes.html" class="btn btn-outline-primary  w-sm-auto">
-        <i class="fa-solid fa-plus me-1"></i> Nova Caixinha
-      </a>
+      <div class="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-2">
+        <div id="boxesMoreWrap" class="d-none">
+          <a href="boxes.html" class="btn btn-outline-primary btn-cta-gradient w-sm-auto" id="seeMoreBoxesBtn">
+            <i class="fa-solid fa-layer-group me-1"></i> Ver outras caixinhas
+          </a>
+        </div>
+
+        <a href="boxes.html" class="btn btn-outline-primary btn-cta-gradient w-sm-auto" id="newBoxBtnDashboard">
+          <i class="fa-solid fa-plus me-1"></i> Nova Caixinha
+        </a>
+      </div>
     </div>
 
     <div id="boxes" class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3"></div>
 
     <div id="emptyBoxes" class="d-none text-center py-5">
-      <i class="fa-solid fa-piggy-bank fa-3x mb-3 text-muted"></i>
-      <h6 class="text-muted">Nenhuma caixinha criada</h6>
-      <p class="small text-muted">Crie sua primeira caixinha para organizar suas finanças</p>
-      <a href="boxes.html" class="btn btn-primary mt-2  w-sm-auto">
-        <i class="fa-solid fa-plus me-1"></i> Criar Caixinha
+      <a href="boxes.html" class="btn btn-primary btn-cta-gradient mt-2 w-sm-auto">
       </a>
+    </div>
+  </div>
+
+  <div class="row mb-4" id="accountsSection">
+    <div class="col-12 d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3">
+      <h5 class="mb-0"><i class="fa-solid fa-file-invoice-dollar me-2"></i> Contas</h5>
+
+      <div class="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-2">
+        <a href="contas.html" class="btn btn-outline-primary btn-cta-gradient w-sm-auto" id="newAccountBtnDashboard">
+          <i class="fa-solid fa-plus me-1"></i> Nova Conta
+        </a>
+      </div>
+    </div>
+
+    <div id="accounts" class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3"></div>
+
+    <div id="emptyAccounts" class="d-none text-center py-5">
+      <a href="contas.html" class="btn btn-primary btn-cta-gradient mt-2 w-sm-auto">
+      </a>
+    </div>
+  </div>
+
+  <div id="latestTransactionsSection" class="mb-5 d-none">
+    <div class="card p-4 shadow-sm latest-transactions-card">
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+        <h5 class="mb-0">
+          <i class="fa-solid fa-clock-rotate-left me-2"></i> Últimas transações
+        </h5>
+        <a href="history.html" class="btn btn-outline-primary btn-sm latest-transactions-history-btn">
+          <i class="fa-solid fa-list-ul me-1"></i> Histórico completo
+        </a>
+      </div>
+      <ul id="latestTransactionsList" class="list-group latest-transactions-list mb-0"></ul>
     </div>
   </div>
 
   <div class="row mt-4">
     <div class="col-12 col-lg-6 mb-3">
       <div class="card p-4 p-md-3 shadow-sm h-100">
-        <h6 class="mb-3">Entradas x Saídas</h6>
-        <div class="chart-wrap" style="height: 320px;">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+          <h6 class="mb-0">Fluxo receitas/despesas</h6>
+          <select id="incomeExpenseFlowRange" class="form-select form-select-sm" style="max-width: 220px;">
+            <option value="last_6_months">Últimos 6 meses</option>
+            <option value="last_3_months">Últimos 3 meses</option>
+            <option value="current_month" selected>Mês atual</option>
+            <option value="all_period">Todo período</option>
+          </select>
+        </div>
+        <div
+          class="chart-wrap chart-expandable"
+          style="height: 320px;"
+          data-chart-title="Fluxo receitas/despesas"
+          data-expand-when="flow-range-not-current"
+        >
           <canvas id="incomeExpenseChart"></canvas>
           <div id="incomeExpenseEmpty" class="chart-placeholder d-none">Sem dados para o período selecionado</div>
         </div>
@@ -205,7 +257,11 @@
           </select>
         </div>
 
-        <div class="chart-wrap" style="height: 320px;">
+        <div
+          class="chart-wrap chart-expandable"
+          style="height: 320px;"
+          data-chart-title="Despesas por categoria"
+        >
           <canvas id="expenseCategoryChart"></canvas>
           <div id="expenseCategoryEmpty" class="chart-placeholder d-none">Sem dados para o período selecionado</div>
         </div>
@@ -213,13 +269,129 @@
     </div>
   </div>
 
-  <div class="mb-4">
-    <button id="toggleAdvancedBtn" class="btn btn-outline-secondary  w-sm-auto">
-      <i class="fa-solid fa-wand-magic-sparkles"></i> Mostrar análise avançada
-    </button>
+  <div class="row mt-1 g-3 dashboard-insights-row">
+    <div class="col-12 col-lg-6 mb-3">
+      <div class="card p-4 p-md-3 shadow-sm monthly-economy-card h-100">
+        <div class="d-flex align-items-start justify-content-between gap-2 mb-2">
+          <h6 class="mb-0">
+            <i class="fa-solid fa-chart-line me-2"></i> Economia mensal
+          </h6>
+          <span id="monthlyEconomyRate" class="dashboard-box-chip monthly-economy-status is-neutral">0,00%</span>
+        </div>
+
+        <div class="row g-3 align-items-center">
+          <div class="col-12 col-sm-5">
+            <div class="monthly-economy-donut-wrap">
+              <canvas id="monthlyEconomyChart"></canvas>
+              <div id="monthlyEconomyDonutPercent" class="monthly-economy-donut-percent">0,00%</div>
+            </div>
+          </div>
+
+          <div class="col-12 col-sm-7">
+            <div id="monthlyEconomyValue" class="dashboard-box-balance">R$ 0,00</div>
+            <div class="dashboard-box-subtitle mb-2">Economizado no mês</div>
+
+            <div class="dashboard-box-metric mb-2">
+              <span class="label">Saídas no mês</span>
+              <strong id="monthlyEconomyExpense">R$ 0,00</strong>
+            </div>
+
+            <div id="monthlyEconomyMessage" class="monthly-economy-message">
+              Você está no caminho certo.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-6 mb-3">
+      <div class="card p-4 p-md-3 shadow-sm monthly-recurring-income-card h-100">
+        <div class="d-flex align-items-start justify-content-between gap-2 mb-2">
+          <h6 class="mb-0">
+            <i class="fa-solid fa-layer-group me-2"></i> Perfil de gastos
+          </h6>
+          <span id="spendingProfileTop" class="dashboard-box-chip monthly-economy-status is-neutral">Sem dados</span>
+        </div>
+
+        <div id="spendingProfileTotal" class="dashboard-box-balance">R$ 0,00</div>
+        <div class="dashboard-box-subtitle mb-2">Sa&iacute;das por grupo no m&ecirc;s</div>
+
+        <div class="dashboard-box-metric mb-2">
+          <span class="label">Lan&ccedil;amentos de sa&iacute;da</span>
+          <strong id="spendingProfileCount">0</strong>
+        </div>
+
+        <div class="dashboard-box-metrics spending-profile-breakdown mb-2">
+          <div class="dashboard-box-metric spending-profile-group-row">
+            <span class="label">Fixo</span>
+            <div class="spending-profile-group-value-wrap">
+              <strong id="spendingProfileFixed">R$ 0,00</strong>
+              <button
+                type="button"
+                class="spending-profile-group-open d-none"
+                id="spendingProfileFixedOpen"
+                data-spending-group-open="fixed"
+                aria-label="Ver lan&ccedil;amentos de gastos fixos"
+              >
+                <i class="fa-solid fa-chevron-right"></i>
+              </button>
+            </div>
+          </div>
+          <div class="dashboard-box-metric spending-profile-group-row">
+            <span class="label">Vari&aacute;vel</span>
+            <div class="spending-profile-group-value-wrap">
+              <strong id="spendingProfileVariable">R$ 0,00</strong>
+              <button
+                type="button"
+                class="spending-profile-group-open d-none"
+                id="spendingProfileVariableOpen"
+                data-spending-group-open="variable"
+                aria-label="Ver lan&ccedil;amentos de gastos vari&aacute;veis"
+              >
+                <i class="fa-solid fa-chevron-right"></i>
+              </button>
+            </div>
+          </div>
+          <div class="dashboard-box-metric spending-profile-group-row">
+            <span class="label">Previsto</span>
+            <div class="spending-profile-group-value-wrap">
+              <strong id="spendingProfilePlanned">R$ 0,00</strong>
+              <button
+                type="button"
+                class="spending-profile-group-open d-none"
+                id="spendingProfilePlannedOpen"
+                data-spending-group-open="planned"
+                aria-label="Ver lan&ccedil;amentos de gastos previstos"
+              >
+                <i class="fa-solid fa-chevron-right"></i>
+              </button>
+            </div>
+          </div>
+          <div class="dashboard-box-metric spending-profile-group-row">
+            <span class="label">Imprevisto</span>
+            <div class="spending-profile-group-value-wrap">
+              <strong id="spendingProfileUnexpected">R$ 0,00</strong>
+              <button
+                type="button"
+                class="spending-profile-group-open d-none"
+                id="spendingProfileUnexpectedOpen"
+                data-spending-group-open="unexpected"
+                aria-label="Ver lan&ccedil;amentos de gastos imprevistos"
+              >
+                <i class="fa-solid fa-chevron-right"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="spendingProfileMessage" class="monthly-economy-message is-neutral">
+          Sem sa&iacute;das no per&iacute;odo selecionado.
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div id="advancedContainer" class="collapse">
+  <div id="advancedContainer" class="mb-5">
     <div class="card p-4 shadow-sm mb-5">
       <h5 class="mb-4">
         <i class="fa-solid fa-scale-balanced"></i> Comparação Avançada
@@ -229,8 +401,8 @@
         <div class="col-12 col-md-3">
           <label class="form-label">Comparação</label>
           <select id="compareMode" class="form-select">
-            <option value="month" selected>Mês atual vs mês anterior</option>
-            <option value="year">Ano atual vs ano anterior</option>
+            <option value="month" selected>Mês atual x mês passado</option>
+            <option value="year">Ano atual x ano passado</option>
           </select>
         </div>
 
@@ -252,55 +424,50 @@
             <option value="balance">Saldo</option>
           </select>
         </div>
-
-        <div class="col-12 col-md-3">
-          <label class="form-label">Visualização</label>
-          <select id="advancedView" class="form-select">
-            <option value="category" selected>Por categoria</option>
-            <option value="daily">Linha do tempo</option>
-          </select>
-        </div>
-
         <div class="col-12 d-flex align-items-end">
           <button type="button" class="btn btn-primary" id="compareBtn">Comparar</button>
         </div>
       </div>
 
-      <div class="card p-3 shadow-sm" style="height: 320px;">
-        <canvas id="advancedComparisonChart"></canvas>
-      </div>
+      <div id="advancedResults" class="d-none mt-4">
+        <div id="advancedSummary" class="advanced-summary-grid mb-3"></div>
 
-      <div class="card p-3 shadow-sm mt-3" style="height: 260px;">
-        <canvas id="timelineChart"></canvas>
-      </div>
-
-      <div id="comparisonBadge" class="mt-3 text-center fw-bold"></div>
-      <div id="alerts" class="mt-4"></div>
-
-      <div class="row mt-4 g-3">
-        <div class="col-12 col-md-6">
-          <h6>📈 Categorias que mais cresceram</h6>
-          <ul id="topUp" class="list-group"></ul>
+        <div
+          class="card p-3 shadow-sm chart-expandable chart-canvas-card"
+          style="height: 320px;"
+          data-chart-title="Comparação avançada"
+        >
+          <canvas id="advancedComparisonChart"></canvas>
         </div>
-        <div class="col-12 col-md-6">
-          <h6>📉 Categorias que mais caíram</h6>
-          <ul id="topDown" class="list-group"></ul>
-        </div>
-      </div>
 
-      <div class="mt-4">
-        <h6>Comparação Detalhada</h6>
-        <div class="table-responsive">
-          <table class="table table-striped mb-0">
-            <thead>
-              <tr>
-                <th>Categoria</th>
-                <th>Valor</th>
-                <th>Variação</th>
-              </tr>
-            </thead>
-            <tbody id="comparisonTable"></tbody>
-          </table>
+        <div
+          class="card p-3 shadow-sm mt-3 chart-expandable chart-canvas-card"
+          style="height: 260px;"
+          data-chart-title="Linha do tempo"
+        >
+          <canvas id="timelineChart"></canvas>
+        </div>
+
+        <div id="comparisonBadge" class="mt-3 text-center fw-bold"></div>
+        <div id="alerts" class="mt-4"></div>
+
+        <div class="row mt-4 g-3">
+          <div class="col-12 col-md-6">
+            <h6><i class="fa-solid fa-arrow-trend-up me-1"></i>Categorias que mais cresceram</h6>
+            <ul id="topUp" class="list-group advanced-ranking-list"></ul>
+          </div>
+          <div class="col-12 col-md-6">
+            <h6><i class="fa-solid fa-arrow-trend-down me-1"></i>Categorias que mais caíram</h6>
+            <ul id="topDown" class="list-group advanced-ranking-list"></ul>
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <div class="d-flex align-items-center justify-content-between gap-2 mb-2 flex-wrap">
+            <h6 class="mb-0">Comparação Detalhada</h6>
+            <span id="comparisonTableLabel" class="advanced-table-label">Período atual x período passado</span>
+          </div>
+          <ul id="comparisonTable" class="list-group advanced-ranking-list mb-0"></ul>
         </div>
       </div>
     </div>
@@ -308,8 +475,41 @@
 
 </div>
 
+<div class="modal fade" id="spendingProfileGroupModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fa-solid fa-layer-group me-2"></i>
+          Hist&oacute;rico do grupo
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+          <div>
+            <div id="spendingProfileGroupPeriod" class="small text-muted">Per&iacute;odo selecionado</div>
+            <div id="spendingProfileGroupName" class="fw-semibold">Grupo</div>
+          </div>
+          <span id="spendingProfileGroupCount" class="dashboard-box-chip is-neutral">0 lan&ccedil;amentos</span>
+        </div>
+
+        <div id="spendingProfileGroupEmpty" class="chart-placeholder d-none">
+          Sem lan&ccedil;amentos para este grupo no per&iacute;odo.
+        </div>
+
+        <ul id="spendingProfileGroupList" class="list-group latest-transactions-list mb-0"></ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
-<script src="/config.js"></script>`r`n  <script src="js/api.js"></script>
+<script src="/config.js"></script>
+  <script src="js/api.js"></script>
 <script src="js/pwa.js"></script>
 <script src="js/utils.js"></script>
 <script src="js/auth.js"></script>
@@ -325,4 +525,13 @@
 
 </body>
 </html>
+
+
+
+
+
+
+
+
+
 
