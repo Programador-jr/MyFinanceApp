@@ -23,10 +23,14 @@ document.addEventListener("DOMContentLoaded", () => {
   bindInviteModal();
 
   // Elementos
-  const tableBody = document.getElementById("transactionsTable");
+  const transactionsCards = document.getElementById("latestTransactionsCards");
+  const transactionsTableWrap = document.getElementById("latestTransactionsTableWrap");
+  const transactionsTableBody = document.getElementById("latestTransactionsTableBody");
+  const transactionsEmptyState = document.getElementById("transactionsEmptyState");
+  const transactionsViewCardsBtn = document.getElementById("transactionsViewCardsBtn");
+  const transactionsViewTableBtn = document.getElementById("transactionsViewTableBtn");
   const form = document.getElementById("transactionForm");
 
-  const monthFilter = document.getElementById("monthFilter");
   const monthIncome = document.getElementById("monthIncome");
   const monthExpense = document.getElementById("monthExpense");
   const monthBalance = document.getElementById("monthBalance");
@@ -58,6 +62,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // Estado
   let editingTransactionId = null;
   let transactionToDelete = null;
+  let cachedCategories = null;
+  const latestTransactionsById = new Map();
 
   // Snapshot do original (para detectar se houve alteração)
   let editOriginal = null;
@@ -69,17 +75,276 @@ document.addEventListener("DOMContentLoaded", () => {
     unexpected: "Imprevisto"
   };
 
+  const yieldIncomeCategoryKey = "rendimentos";
+  const memberNameById = new Map();
+  let memberDirectoryLoaded = false;
+  const TRANSACTIONS_VIEW_STORAGE_KEY = "myfinance_transactions_view";
+  let transactionsView = loadStoredTransactionsView();
+
   /* ===============================
    * Helpers
    * =============================== */
 
   function fmtBRL(n) {
-    return `R$ ${(Number(n) || 0).toFixed(2)}`;
+    if (typeof formatCurrency === "function") return formatCurrency(n);
+    return Number(n || 0).toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    });
   }
 
-  function getSelectedYearMonth() {
-    const [y, m] = (monthFilter.value || "").split("-");
-    return { y, m };
+  function toAmount(value, fallback = 0) {
+    if (typeof toNumericValue === "function") return toNumericValue(value, fallback);
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : fallback;
+  }
+
+  function todayLocalISO() {
+    if (typeof toLocalISODate === "function") return toLocalISODate(new Date());
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, "0");
+    const d = String(now.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
+
+  function toApiDateValue(localDate) {
+    if (typeof toApiIsoFromLocalDateInput === "function") {
+      return toApiIsoFromLocalDateInput(localDate, { hour: 12 });
+    }
+    return `${String(localDate || "").trim()}T12:00:00`;
+  }
+
+  function formatDateCell(value) {
+    if (typeof formatDateUserLocal === "function") {
+      return formatDateUserLocal(value, { locale: "pt-BR", includeTime: false });
+    }
+    return (String(value || "").slice(0, 10)).split("-").reverse().join("/");
+  }
+
+  function normalizeText(value) {
+    return String(value || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .trim()
+      .toLowerCase();
+  }
+
+  function isYieldIncomeTransaction(transaction) {
+    const type = normalizeText(transaction?.type);
+    const category = normalizeText(transaction?.category);
+    const group = normalizeText(transaction?.group);
+    return type === "income" && category === yieldIncomeCategoryKey && group === "variable";
+  }
+
+  function normalizeId(value) {
+    if (!value) return "";
+    if (typeof value === "string") return value;
+    if (typeof value === "number") return String(value);
+    if (typeof value === "object") {
+      return String(value._id || value.id || "").trim();
+    }
+    return String(value).trim();
+  }
+
+  function pickName(value) {
+    if (typeof value === "string" && value.trim()) return value.trim();
+    return "";
+  }
+
+  function seedMemberMapWithLoggedUser() {
+    try {
+      const raw = localStorage.getItem("user");
+      if (!raw) return;
+      const user = JSON.parse(raw);
+      if (!user) return;
+
+      const id = normalizeId(user.id || user._id);
+      const name =
+        pickName(user.name) ||
+        pickName(user.nome) ||
+        pickName(user.email) ||
+        "Você";
+
+      if (id) memberNameById.set(id, name);
+    } catch (_) {}
+  }
+
+  async function silentApiFetch(url, options = {}) {
+    const token = localStorage.getItem("token");
+    const headers = {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(options.headers || {})
+    };
+
+    const response = await fetch(API_URL + url, {
+      ...options,
+      headers
+    });
+
+    if (response.status === 401) {
+      if (typeof window.appLogout === "function") window.appLogout("401");
+      throw new Error("Sessão expirada");
+    }
+
+    let data = null;
+    try {
+      data = await response.json();
+    } catch (_) {
+      data = null;
+    }
+
+    if (!response.ok) {
+      const error = new Error(data?.error || "Erro na requisição");
+      error.status = response.status;
+      throw error;
+    }
+
+    return data;
+  }
+
+  async function ensureMemberDirectoryLoaded() {
+    if (memberDirectoryLoaded) return;
+
+    seedMemberMapWithLoggedUser();
+
+    try {
+      const familyData = await silentApiFetch("/family");
+      const members = Array.isArray(familyData?.members) ? familyData.members : [];
+
+      members.forEach((member) => {
+        const id = normalizeId(member?.id || member?._id);
+        const name =
+          pickName(member?.name) ||
+          pickName(member?.email) ||
+          "";
+
+        if (id && name) {
+          memberNameById.set(id, name);
+        }
+      });
+    } catch (error) {
+      if (error?.status !== 404) {
+        console.warn("Não foi possível carregar o diretório de membros.", error);
+      }
+    } finally {
+      memberDirectoryLoaded = true;
+    }
+  }
+
+  function resolveMemberName(transaction) {
+    const inlineName =
+      pickName(transaction?.memberName) ||
+      pickName(transaction?.userName) ||
+      pickName(transaction?.createdByName) ||
+      pickName(transaction?.user?.name) ||
+      pickName(transaction?.userId?.name);
+
+    if (inlineName) return inlineName;
+
+    const userId = normalizeId(
+      transaction?.userId ||
+      transaction?.createdBy ||
+      transaction?.user
+    );
+
+    if (userId && memberNameById.has(userId)) {
+      return memberNameById.get(userId);
+    }
+
+    return "Não informado";
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
+  }
+
+  function getCurrentYearMonth() {
+    const now = new Date();
+    return {
+      year: now.getFullYear(),
+      month: now.getMonth() + 1,
+    };
+  }
+
+  function parseTransactionDate(value) {
+    if (typeof parseDateLikeLocal === "function") {
+      return parseDateLikeLocal(value, { middayHour: 12 });
+    }
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+
+  function isSameYearMonth(date, year, month) {
+    if (!date) return false;
+    return date.getFullYear() === year && date.getMonth() + 1 === month;
+  }
+
+  function extractTransactions(payload) {
+    if (Array.isArray(payload)) return payload;
+    if (Array.isArray(payload?.transactions)) return payload.transactions;
+    if (Array.isArray(payload?.items)) return payload.items;
+    if (Array.isArray(payload?.data?.transactions)) return payload.data.transactions;
+    return [];
+  }
+
+  function getLatestTransactions(items, limit = 5) {
+    const list = Array.isArray(items) ? items : [];
+    const maxItems = Math.max(0, Number(limit) || 5);
+
+    return list
+      .map((item) => {
+        const date = parseTransactionDate(item?.date || item?.createdAt);
+        return {
+          item,
+          dateMs: date ? date.getTime() : 0
+        };
+      })
+      .sort((a, b) => b.dateMs - a.dateMs)
+      .slice(0, maxItems)
+      .map((entry) => entry.item);
+  }
+
+  function normalizeTransactionsView(value) {
+    return value === "table" ? "table" : "cards";
+  }
+
+  function loadStoredTransactionsView() {
+    try {
+      return normalizeTransactionsView(localStorage.getItem(TRANSACTIONS_VIEW_STORAGE_KEY));
+    } catch (_) {
+      return "cards";
+    }
+  }
+
+  function persistTransactionsView(value) {
+    try {
+      localStorage.setItem(
+        TRANSACTIONS_VIEW_STORAGE_KEY,
+        normalizeTransactionsView(value)
+      );
+    } catch (_) {}
+  }
+
+  function syncTransactionsView() {
+    const showingCards = transactionsView === "cards";
+    transactionsCards?.classList.toggle("d-none", !showingCards);
+    transactionsTableWrap?.classList.toggle("d-none", showingCards);
+    transactionsViewCardsBtn?.classList.toggle("is-active", showingCards);
+    transactionsViewCardsBtn?.setAttribute("aria-pressed", showingCards ? "true" : "false");
+    transactionsViewTableBtn?.classList.toggle("is-active", !showingCards);
+    transactionsViewTableBtn?.setAttribute("aria-pressed", !showingCards ? "true" : "false");
+  }
+
+  function setTransactionsView(nextView) {
+    transactionsView = normalizeTransactionsView(nextView);
+    persistTransactionsView(transactionsView);
+    syncTransactionsView();
   }
 
   /**
@@ -89,7 +354,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function getEditPayload() {
     return {
       type: (editType?.value || "").trim(),
-      value: Number(editValue?.value),
+      value: toAmount(editValue?.value, 0),
       category: (editCategory?.value || "").trim(),
       group: (editGroup?.value || "").trim(),
       date: (editDate?.value || "").trim() // YYYY-MM-DD
@@ -123,7 +388,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!editOriginal) return false;
     return (
       p.type !== editOriginal.type ||
-      Number(p.value) !== Number(editOriginal.value) ||
+      toAmount(p.value, 0) !== toAmount(editOriginal.value, 0) ||
       p.category !== editOriginal.category ||
       p.group !== editOriginal.group ||
       p.date !== editOriginal.date
@@ -158,56 +423,229 @@ document.addEventListener("DOMContentLoaded", () => {
     saveEditBtn.style.cursor = "not-allowed";
   }
 
+  function setEditFormDisabled(disabled) {
+    [editType, editValue, editCategory, editGroup, editDate].forEach((el) => {
+      if (!el) return;
+      el.disabled = Boolean(disabled);
+    });
+  }
+
+  function setEditModalLoading(isLoading) {
+    const loading = Boolean(isLoading);
+    setEditFormDisabled(loading);
+    if (loading) {
+      disableEditSaveBtn();
+      if (editCategory) {
+        editCategory.innerHTML = '<option value="">Carregando...</option>';
+      }
+    }
+  }
+
+  async function getCategoriesCached(force = false) {
+    if (!force && Array.isArray(cachedCategories)) return cachedCategories;
+    const categories = await apiFetch("/categories");
+    cachedCategories = Array.isArray(categories) ? categories : [];
+    return cachedCategories;
+  }
+
+  async function fillEditModalFromTransaction(transaction) {
+    editType.value = transaction?.type === "income" ? "income" : "expense";
+    if (typeof setMoneyInputValue === "function") {
+      setMoneyInputValue(editValue, transaction?.value, { allowEmpty: false });
+    } else {
+      editValue.value = String(transaction?.value ?? "");
+    }
+    editGroup.value = String(transaction?.group || "unexpected").trim().toLowerCase();
+    if (typeof toLocalInputDate === "function") {
+      editDate.value = toLocalInputDate(transaction?.date || transaction?.createdAt);
+    } else {
+      editDate.value = String(transaction?.date || transaction?.createdAt || "").slice(0, 10);
+    }
+
+    await loadEditCategories(editType.value, transaction?.category);
+
+    editOriginal = {
+      type: (editType.value || "").trim(),
+      value: toAmount(editValue.value, 0),
+      category: (editCategory.value || "").trim(),
+      group: (editGroup.value || "").trim(),
+      date: (editDate.value || "").trim()
+    };
+  }
+
   /* ===============================
    * Carregar mês e render tabela
    * =============================== */
 
-  async function loadMonthSummary(year, month) {
+  async function loadLatestTransactions(limit = 5) {
     try {
-      const data = await apiFetch(`/transactions/month?year=${year}&month=${month}`);
+      const { year, month } = getCurrentYearMonth();
+
+      const [allData, monthData] = await Promise.all([
+        apiFetch("/transactions"),
+        apiFetch(`/transactions/month?year=${year}&month=${month}`).catch(() => null),
+      ]);
+
+      const allTransactions = extractTransactions(allData);
+      const monthTransactionsRaw = extractTransactions(monthData);
+      const monthTransactions = monthTransactionsRaw.length
+        ? monthTransactionsRaw
+        : allTransactions.filter((tx) =>
+          isSameYearMonth(
+            parseTransactionDate(tx?.date || tx?.createdAt),
+            year,
+            month
+          )
+        );
+
+      const latestTransactions = getLatestTransactions(allTransactions, limit);
+      latestTransactionsById.clear();
+      latestTransactions.forEach((tx) => {
+        const txId = String(tx?._id || tx?.id || "").trim();
+        if (txId) latestTransactionsById.set(txId, tx);
+      });
+
+      await ensureMemberDirectoryLoaded();
 
       let income = 0;
       let expense = 0;
 
-      (data.transactions || []).forEach((t) => {
-        if (t.type === "income") income += Number(t.value);
-        if (t.type === "expense") expense += Number(t.value);
+      monthTransactions.forEach((t) => {
+        if (t.type === "income") income += toAmount(t.value, 0);
+        if (t.type === "expense") expense += toAmount(t.value, 0);
       });
 
       monthIncome.textContent = fmtBRL(income);
       monthExpense.textContent = fmtBRL(expense);
       monthBalance.textContent = fmtBRL(income - expense);
 
-      tableBody.innerHTML = "";
+      transactionsCards.innerHTML = "";
+      if (transactionsTableBody) transactionsTableBody.innerHTML = "";
 
-      (data.transactions || []).forEach((t) => {
-        const dateStr = (t.date || "").slice(0, 10).split("-").reverse().join("/");
+      if (!latestTransactions.length) {
+        transactionsEmptyState?.classList.remove("d-none");
+        return;
+      }
+
+      transactionsEmptyState?.classList.add("d-none");
+
+      latestTransactions.forEach((t) => {
+        const txId = String(t?._id || t?.id || "").trim();
+        const dateStr = formatDateCell(t?.date || t?.createdAt);
         const typeLabel = t.type === "income" ? "Entrada" : "Saída";
-
-        // NOVO: pega nome do membro (userId populado pelo backend)
-        const memberName = t.userId?.name || "Não informado"; // optional chaining [web:91]
-
-        tableBody.innerHTML += `
-          <tr>
-            <td>${dateStr}</td>
-            <td>${typeLabel}</td>
-            <td>${t.category}</td>
-            <td>${groupLabels[t.group] || t.group}</td>
-            <td>${fmtBRL(t.value)}</td>
-            <td>${memberName}</td>
-            <td>
-              <button class="btn btn-sm btn-warning me-1" type="button" data-action="edit" data-id="${t._id}">
+        const isYieldIncome = isYieldIncomeTransaction(t);
+        const normalizedTypeLabel =
+          t.type === "income" && isYieldIncome
+            ? "Entrada (Liquidez diária)"
+            : typeLabel;
+        const groupLabel = groupLabels[t.group] || t.group || "-";
+        const memberName = resolveMemberName(t);
+        const categorySafe = escapeHtml(t?.category || "Sem categoria");
+        const yieldPill = isYieldIncome
+          ? '<span class="transaction-origin-pill">Liquidez diária</span>'
+          : "";
+        const typeClass = t.type === "income" ? "is-income" : "is-expense";
+        const typeIcon = t.type === "income" ? "fa-arrow-down-long" : "fa-arrow-up-long";
+        const typeChipClass = t.type === "income" ? "is-income" : "is-expense";
+        const actionsHtml = txId
+          ? `
+            <div class="transaction-latest-actions">
+              <button class="btn btn-sm btn-outline-primary me-1 transactions-action-btn" type="button" data-action="edit" data-id="${escapeHtml(txId)}">
                 <i class="fa-solid fa-pen"></i>
               </button>
-              <button class="btn btn-sm btn-danger" type="button" data-action="delete" data-id="${t._id}">
+              <button class="btn btn-sm btn-outline-danger transactions-action-btn" type="button" data-action="delete" data-id="${escapeHtml(txId)}">
                 <i class="fa-solid fa-trash"></i>
               </button>
-            </td>
-          </tr>
+            </div>
+          `
+          : "";
+        const tableActionsHtml = txId
+          ? `
+            <div class="transactions-table-actions text-end">
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-primary me-1 transactions-action-btn"
+                data-action="edit"
+                data-id="${escapeHtml(txId)}"
+                title="Editar"
+                aria-label="Editar transação"
+              >
+                <i class="fa-solid fa-pen"></i>
+              </button>
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-danger transactions-action-btn"
+                data-action="delete"
+                data-id="${escapeHtml(txId)}"
+                title="Excluir"
+                aria-label="Excluir transação"
+              >
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+          `
+          : '<span class="text-muted small">-</span>';
+
+        transactionsCards.innerHTML += `
+          <div class="col-12 col-md-6 col-xl-4">
+            <article class="transaction-latest-card ${typeClass} ${isYieldIncome ? "transaction-row-yield" : ""}">
+              <div class="transaction-latest-head">
+                <span class="transaction-latest-type ${typeClass}">
+                  <i class="fa-solid ${typeIcon} me-1"></i>${escapeHtml(normalizedTypeLabel)}
+                </span>
+                <span class="transaction-latest-date">${escapeHtml(dateStr)}</span>
+              </div>
+
+              <div class="transaction-latest-meta">
+                <div class="transaction-latest-meta-item">
+                  <i class="fa-solid fa-tag"></i>
+                  <span>${categorySafe} ${yieldPill}</span>
+                </div>
+                <div class="transaction-latest-meta-item">
+                  <i class="fa-solid fa-layer-group"></i>
+                  <span>${escapeHtml(groupLabel)}</span>
+                </div>
+                <div class="transaction-latest-meta-item">
+                  <i class="fa-solid fa-user"></i>
+                  <span>${escapeHtml(memberName)}</span>
+                </div>
+              </div>
+
+              <div class="transaction-latest-footer">
+                <strong class="transaction-latest-value">${fmtBRL(t.value)}</strong>
+                ${actionsHtml}
+              </div>
+            </article>
+          </div>
         `;
+
+        if (transactionsTableBody) {
+          transactionsTableBody.innerHTML += `
+            <tr${isYieldIncome ? ' class="transaction-row-yield"' : ""}>
+              <td>${escapeHtml(dateStr)}</td>
+              <td>
+                <span class="transactions-type-chip ${typeChipClass}">
+                  <i class="fa-solid ${typeIcon}"></i>
+                  ${escapeHtml(normalizedTypeLabel)}
+                </span>
+              </td>
+              <td>${categorySafe} ${yieldPill}</td>
+              <td>${escapeHtml(groupLabel)}</td>
+              <td>${escapeHtml(memberName)}</td>
+              <td class="text-end fw-semibold">${escapeHtml(fmtBRL(t.value))}</td>
+              <td class="text-end">${tableActionsHtml}</td>
+            </tr>
+          `;
+        }
       });
     } catch (error) {
       showAlert("Erro ao carregar transações", "danger", "triangle-exclamation");
+      transactionsCards.innerHTML = "";
+      if (transactionsTableBody) transactionsTableBody.innerHTML = "";
+      transactionsEmptyState?.classList.remove("d-none");
+      monthIncome.textContent = fmtBRL(0);
+      monthExpense.textContent = fmtBRL(0);
+      monthBalance.textContent = fmtBRL(0);
     }
   }
 
@@ -224,10 +662,10 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const payload = {
         type: document.getElementById("type").value,
-        value: Number(document.getElementById("value").value),
+        value: toAmount(document.getElementById("value").value, 0),
         category: document.getElementById("category").value,
         group: document.getElementById("group").value,
-        date: document.getElementById("date").value + "T12:00:00"
+        date: toApiDateValue(document.getElementById("date").value)
       };
 
       await apiFetch("/transactions", "POST", payload);
@@ -235,13 +673,12 @@ document.addEventListener("DOMContentLoaded", () => {
       form.reset();
 
       // Define data atual novamente
-      const today = new Date().toISOString().split("T")[0];
+      const today = todayLocalISO();
       document.getElementById("date").value = today;
 
       showAlert("Transação criada com sucesso!", "success", "check-circle");
 
-      const { y, m } = getSelectedYearMonth();
-      await loadMonthSummary(y, m);
+      await loadLatestTransactions(5);
     } catch (error) {
       showAlert(error.message || "Erro ao criar transação", "danger", "triangle-exclamation");
     } finally {
@@ -254,36 +691,25 @@ document.addEventListener("DOMContentLoaded", () => {
    * =============================== */
 
   async function editTransaction(id) {
+    const transactionId = String(id || "").trim();
+    if (!transactionId) return;
+
+    editingTransactionId = transactionId;
+    setEditModalLoading(true);
+    editModal?.show();
+
     try {
-      // Ao iniciar edição, trava o botão até carregar tudo e validar/dirty
-      disableEditSaveBtn();
+      const localTransaction = latestTransactionsById.get(transactionId) || null;
+      const transaction = localTransaction || await apiFetch(`/transactions/${transactionId}`);
+      await fillEditModalFromTransaction(transaction);
 
-      const t = await apiFetch(`/transactions/${id}`);
-      editingTransactionId = id;
-
-      editType.value = t.type;
-      editValue.value = t.value;
-      editGroup.value = t.group;
-      editDate.value = (t.date || "").slice(0, 10);
-
-      // Carrega categorias do tipo e seleciona a categoria atual
-      await loadEditCategories(t.type, t.category);
-
-      // Snapshot original (normalizado) para detectar mudanças
-      editOriginal = {
-        type: (editType.value || "").trim(),
-        value: Number(editValue.value),
-        category: (editCategory.value || "").trim(),
-        group: (editGroup.value || "").trim(),
-        date: (editDate.value || "").trim()
-      };
-
-      // Atualiza estado do botão com base em (valid && dirty)
+      // Atualiza estado do botao com base em (valid && dirty)
       updateEditSaveState();
-
-      editModal?.show();
     } catch (error) {
-      showAlert("Erro ao carregar transação para edição", "danger", "triangle-exclamation");
+      showAlert("Erro ao carregar transa\u00e7\u00e3o para edi\u00e7\u00e3o", "danger", "triangle-exclamation");
+      editModal?.hide();
+    } finally {
+      setEditModalLoading(false);
     }
   }
 
@@ -314,14 +740,13 @@ document.addEventListener("DOMContentLoaded", () => {
         value: p.value,
         category: p.category,
         group: p.group,
-        date: p.date + "T12:00:00"
+        date: toApiDateValue(p.date)
       });
 
       editModal?.hide();
       showAlert("Transação atualizada com sucesso!", "success", "check-circle");
 
-      const { y, m } = getSelectedYearMonth();
-      await loadMonthSummary(y, m);
+      await loadLatestTransactions(5);
     } catch (error) {
       showAlert(error.message || "Erro ao atualizar transação", "danger", "triangle-exclamation");
     } finally {
@@ -351,8 +776,7 @@ document.addEventListener("DOMContentLoaded", () => {
       deleteModal?.hide();
       showAlert("Transação excluída com sucesso!", "success", "check-circle");
 
-      const { y, m } = getSelectedYearMonth();
-      await loadMonthSummary(y, m);
+      await loadLatestTransactions(5);
     } catch (error) {
       showAlert(error.message || "Erro ao excluir transação", "danger", "triangle-exclamation");
     } finally {
@@ -367,7 +791,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function loadCategories(type) {
     try {
-      const categories = await apiFetch("/categories");
+      const categories = await getCategoriesCached();
       const categorySelect = document.getElementById("category");
 
       categorySelect.innerHTML = "";
@@ -384,7 +808,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function loadEditCategories(type, selected) {
     try {
-      const categories = await apiFetch("/categories");
+      const categories = await getCategoriesCached();
 
       editCategory.innerHTML = "";
 
@@ -422,6 +846,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       await apiFetch("/categories", "POST", { name, type });
+      cachedCategories = null;
 
       categoryModal?.hide();
       showAlert("Categoria criada com sucesso!", "success", "check-circle");
@@ -449,10 +874,21 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* ===============================
-   * Event delegation (tabela)
+   * Event delegation (cards)
    * =============================== */
 
-  tableBody.addEventListener("click", (e) => {
+  transactionsCards?.addEventListener("click", (e) => {
+    const btn = e.target.closest("button[data-action]");
+    if (!btn) return;
+
+    const action = btn.dataset.action;
+    const id = btn.dataset.id;
+
+    if (action === "edit") editTransaction(id);
+    if (action === "delete") openDeleteModal(id);
+  });
+
+  transactionsTableBody?.addEventListener("click", (e) => {
     const btn = e.target.closest("button[data-action]");
     if (!btn) return;
 
@@ -471,6 +907,12 @@ document.addEventListener("DOMContentLoaded", () => {
   confirmDeleteBtn?.addEventListener("click", deleteTransactionConfirmed);
   openCategoryBtn?.addEventListener("click", openCategoryModal);
   saveCategoryBtn?.addEventListener("click", createCategoryFromModal);
+  transactionsViewCardsBtn?.addEventListener("click", () => {
+    setTransactionsView("cards");
+  });
+  transactionsViewTableBtn?.addEventListener("click", () => {
+    setTransactionsView("table");
+  });
 
   // Sempre que o usuário mexer nos campos do modal de edição, recalcula botão salvar
   [editType, editValue, editCategory, editGroup, editDate].forEach((el) => {
@@ -495,21 +937,15 @@ document.addEventListener("DOMContentLoaded", () => {
    * =============================== */
 
   // Define mês atual no filtro
-  const now = new Date();
-  monthFilter.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
   // Define data atual no input do formulário
-  document.getElementById("date").value = now.toISOString().split("T")[0];
+  document.getElementById("date").value = todayLocalISO();
 
   // Carrega categorias iniciais e lista do mês atual
   loadCategories(document.getElementById("type").value);
 
-  const { y, m } = getSelectedYearMonth();
-  loadMonthSummary(y, m);
+  setTransactionsView(transactionsView);
+  loadLatestTransactions(5);
 
-  // Troca de mês
-  monthFilter.addEventListener("change", () => {
-    const { y, m } = getSelectedYearMonth();
-    loadMonthSummary(y, m);
-  });
 });
+

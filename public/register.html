@@ -8,16 +8,14 @@
   <link rel="apple-touch-icon" href="/assets/icons/icon-192.png">
   <title>Cadastro - MyFinance</title>
 
-  <!-- Bootstrap + FontAwesome -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet" />
 
-  <!-- CSS específico da área de autenticação -->
   <link href="assets/css/auth.css" rel="stylesheet" />
+  <link href="assets/css/light-mode.css" rel="stylesheet" />
 </head>
 
 <body>
-  <!-- Alert Container (showAlert / utils.js) -->
   <div id="alert-container"
        class="position-fixed top-0 start-50 translate-middle-x mt-3"
        style="z-index: 1055; width: 90%; max-width: 420px;">
@@ -64,8 +62,12 @@
               </button>
             </div>
 
-            <!-- Mensagem de força da senha (UI) -->
-            <div id="passwordStrength" class="mt-2" style="font-size: 0.85rem;"></div>
+            <div class="password-strength">
+              <div class="strength-bar">
+                <div class="strength-fill" id="strengthFill"></div>
+              </div>
+              <div class="strength-text" id="strengthText">Digite uma senha</div>
+            </div>
           </div>
 
           <div class="input-group-custom">
@@ -79,11 +81,9 @@
               </button>
             </div>
 
-            <!-- Mensagem de match (UI) -->
             <div id="passwordMatch" class="mt-2" style="font-size: 0.85rem;"></div>
           </div>
 
-          <!-- Requisitos (UI) -->
           <div class="password-requirements">
             <div class="requirements-title">
               <i class="fa-solid fa-shield"></i>
@@ -114,14 +114,13 @@
             </div>
           </div>
 
-          <!-- Termos -->
           <div class="terms-check" id="termsCheck">
             <div class="terms-checkbox" id="termsCheckbox"></div>
             <span class="terms-label">
               Concordo com os
-              <a href="#" class="terms-link">Termos de Uso</a>
+              <a href="#" class="terms-link" data-legal="terms">Termos de Uso</a>
               e a
-              <a href="#" class="terms-link">Política de Privacidade</a>
+              <a href="#" class="terms-link" data-legal="privacy">Pol&iacute;tica de Privacidade</a>
             </span>
           </div>
 
@@ -139,11 +138,45 @@
     </div>
   </div>
 
-  <!-- Scripts (ordem importa: api -> utils -> register) -->
-  <script src="/config.js"></script>`r`n  <script src="js/api.js"></script>
+  <div class="legal-modal" id="legalModal" aria-hidden="true" hidden>
+    <div class="legal-modal__backdrop" data-legal-close></div>
+    <div class="legal-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="legalModalTitle">
+      <div class="legal-modal__header">
+        <h3 class="legal-modal__title" id="legalModalTitle">Termos de Uso</h3>
+        <button type="button" class="legal-modal__close" data-legal-close aria-label="Fechar modal">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="legal-modal__body" id="legalModalBody"></div>
+    </div>
+  </div>
+
+  <template id="legalTermsContent">
+    <p><strong>1. Aceite.</strong> Ao criar conta e usar o MyFinance, voc&ecirc; concorda com estes Termos de Uso.</p>
+    <p><strong>2. Conta e seguran&ccedil;a.</strong> Voc&ecirc; &eacute; respons&aacute;vel pelas credenciais da conta e pelas atividades realizadas nela.</p>
+    <p><strong>3. Uso permitido.</strong> O servi&ccedil;o deve ser usado para controle financeiro pessoal e familiar, sem uso il&iacute;cito.</p>
+    <p><strong>4. Dados informados.</strong> Voc&ecirc; se compromete a informar dados verdadeiros para permitir c&aacute;lculos e relat&oacute;rios corretos.</p>
+    <p><strong>5. Disponibilidade.</strong> O sistema pode passar por manuten&ccedil;&atilde;o, atualiza&ccedil;&otilde;es e melhorias sem aviso pr&eacute;vio.</p>
+    <p><strong>6. Limita&ccedil;&atilde;o.</strong> O MyFinance n&atilde;o substitui orienta&ccedil;&atilde;o financeira profissional e n&atilde;o garante resultados.</p>
+    <p><strong>7. Encerramento.</strong> O uso indevido pode levar &agrave; suspens&atilde;o ou remo&ccedil;&atilde;o da conta para prote&ccedil;&atilde;o da plataforma.</p>
+    <p><strong>8. Atualiza&ccedil;&otilde;es.</strong> Estes termos podem ser atualizados periodicamente; a vers&atilde;o vigente prevalece no uso do servi&ccedil;o.</p>
+  </template>
+
+  <template id="legalPrivacyContent">
+    <p><strong>1. Dados coletados.</strong> Coletamos dados de cadastro, prefer&ecirc;ncias e lan&ccedil;amentos para funcionamento da plataforma.</p>
+    <p><strong>2. Finalidade.</strong> Os dados s&atilde;o usados para autentica&ccedil;&atilde;o, organiza&ccedil;&atilde;o financeira, relat&oacute;rios e recursos de seguran&ccedil;a.</p>
+    <p><strong>3. Compartilhamento.</strong> N&atilde;o vendemos dados pessoais. O compartilhamento ocorre apenas quando necess&aacute;rio para opera&ccedil;&atilde;o legal e t&eacute;cnica.</p>
+    <p><strong>4. Prote&ccedil;&atilde;o.</strong> Adotamos medidas de seguran&ccedil;a para reduzir riscos de acesso n&atilde;o autorizado.</p>
+    <p><strong>5. Reten&ccedil;&atilde;o.</strong> Os dados permanecem enquanto a conta estiver ativa ou pelo prazo legal aplic&aacute;vel.</p>
+    <p><strong>6. Seus direitos.</strong> Voc&ecirc; pode solicitar atualiza&ccedil;&atilde;o, corre&ccedil;&atilde;o e exclus&atilde;o de dados, conforme a legisla&ccedil;&atilde;o vigente.</p>
+    <p><strong>7. Cookies e sess&atilde;o.</strong> Podemos usar recursos de sess&atilde;o para manter login e prefer&ecirc;ncias do usu&aacute;rio.</p>
+    <p><strong>8. Contato.</strong> D&uacute;vidas sobre privacidade podem ser enviadas pelos canais oficiais do MyFinance.</p>
+  </template>
+
+  <script src="/config.js"></script>
+  <script src="js/api.js"></script>
   <script src="js/pwa.js"></script>
   <script src="js/utils.js"></script>
   <script src="js/register.js"></script>
 </body>
 </html>
-

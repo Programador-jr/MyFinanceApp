@@ -1,4 +1,3 @@
-// public/js/idleLogout.js
 (function () {
   const IDLE_LIMIT_MS = 30 * 60 * 1000
   const TOKEN_KEY = "token";

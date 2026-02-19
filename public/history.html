@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <meta name="theme-color" content="#111111" />
+  <link rel="apple-touch-icon" href="/assets/icons/icon-192.png" />
+  <title>MyFinance | Histórico de lançamentos</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+  <link href="assets/css/navbar.css" rel="stylesheet" />
+  <link href="assets/css/history.css" rel="stylesheet" />
+  <link href="assets/css/light-mode.css" rel="stylesheet" />
+</head>
+
+<body>
+  <div id="loadNavbar"></div>
+
+  <div
+    id="alert-container"
+    class="position-fixed top-0 start-50 translate-middle-x mt-3"
+    style="z-index: 1055; width: 90%; max-width: 420px;"
+  ></div>
+
+  <div class="modal fade" id="logoutConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="fa-solid fa-right-from-bracket text-danger me-2"></i>
+            Confirmar saída
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p>Tem certeza que deseja sair do MyFinance?</p>
+          <p class="text-muted small">Você será desconectado e redirecionado para a página de login.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-success" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-danger" id="confirmLogout">Sair</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-xxl py-3 py-md-4">
+    <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3 mb-4">
+      <div>
+        <h3 class="history-title mb-1">
+          <i class="fa-solid fa-clock-rotate-left me-2"></i>
+          Histórico completo de lançamentos
+        </h3>
+      </div>
+
+      <div class="d-flex flex-wrap align-items-center gap-2">
+        <button
+          id="toggleFiltersPanelBtn"
+          type="button"
+          class="btn btn-outline-primary history-filter-toggle-btn"
+          aria-expanded="false"
+          aria-controls="historyFiltersPanel"
+        >
+          <i class="fa-solid fa-filter me-1"></i>
+          Filtros
+        </button>
+        <div class="btn-group history-view-switch" role="group" aria-label="Modo de visualização">
+          <button
+            id="viewCardsBtn"
+            type="button"
+            class="btn btn-outline-primary history-view-btn"
+            aria-pressed="true"
+          >
+            <i class="fa-solid fa-table-cells-large me-1"></i>
+            Cards
+          </button>
+          <button
+            id="viewTableBtn"
+            type="button"
+            class="btn btn-outline-primary history-view-btn"
+            aria-pressed="false"
+          >
+            <i class="fa-solid fa-table me-1"></i>
+            Tabela
+          </button>
+        </div>
+        <button id="exportCsvBtn" type="button" class="btn btn-outline-secondary">
+          <i class="fa-solid fa-file-csv me-1"></i>
+          Exportar CSV
+        </button>
+        <a href="transactions.html" class="btn btn-primary">
+          <i class="fa-solid fa-plus me-1"></i>
+          Novo lançamento
+        </a>
+      </div>
+    </div>
+
+    <section id="historyFiltersPanel" class="history-filters-panel">
+      <div class="card p-3 shadow-sm history-filter-card">
+      <div class="history-filter-head d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+        <span class="history-filter-title">
+          <i class="fa-solid fa-filter me-1"></i>
+          Opções de filtro
+        </span>
+        <span class="history-filter-summary" id="historyFilterSummary">0 lançamentos</span>
+      </div>
+
+      <form id="historyFiltersForm" class="row g-3" novalidate>
+        <div class="col-12 col-lg-4">
+          <label class="form-label" for="filterSearch">Busca</label>
+          <input
+            type="search"
+            id="filterSearch"
+            class="form-control"
+            placeholder="Categoria, membro..."
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-2">
+          <label class="form-label" for="filterPeriod">Período</label>
+          <select id="filterPeriod" class="form-select">
+            <option value="current_month" selected>Mês atual</option>
+            <option value="last_90_days">Últimos 90 dias</option>
+            <option value="last_6_months">Últimos 6 meses</option>
+            <option value="current_year">Ano atual</option>
+            <option value="all">Todo período</option>
+            <option value="custom">Personalizado</option>
+          </select>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-2 history-custom-range d-none">
+          <label class="form-label" for="filterStartDate">Data inicial</label>
+          <input type="date" id="filterStartDate" class="form-control" />
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-2 history-custom-range d-none">
+          <label class="form-label" for="filterEndDate">Data final</label>
+          <input type="date" id="filterEndDate" class="form-control" />
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-2">
+          <label class="form-label" for="filterType">Tipo</label>
+          <select id="filterType" class="form-select">
+            <option value="all">Todos</option>
+            <option value="income">Entrada</option>
+            <option value="expense">Saída</option>
+          </select>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-2">
+          <label class="form-label" for="filterGroup">Grupo</label>
+          <select id="filterGroup" class="form-select">
+            <option value="all">Todos</option>
+            <option value="fixed">Fixo</option>
+            <option value="variable">Variável</option>
+            <option value="planned">Previsto</option>
+            <option value="unexpected">Imprevisto</option>
+          </select>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-2">
+          <label class="form-label" for="filterCategory">Categoria</label>
+          <select id="filterCategory" class="form-select">
+            <option value="all">Todas</option>
+          </select>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-2">
+          <label class="form-label" for="filterMember">Membro</label>
+          <select id="filterMember" class="form-select">
+            <option value="all">Todos</option>
+          </select>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-2">
+          <label class="form-label" for="filterMinValue">Valor mínimo</label>
+          <input
+            type="text"
+            inputmode="decimal"
+            autocomplete="off"
+            data-money-mask="brl"
+            id="filterMinValue"
+            class="form-control"
+            placeholder="0,00"
+          />
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-2">
+          <label class="form-label" for="filterMaxValue">Valor máximo</label>
+          <input
+            type="text"
+            inputmode="decimal"
+            autocomplete="off"
+            data-money-mask="brl"
+            id="filterMaxValue"
+            class="form-control"
+            placeholder="0,00"
+          />
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-2">
+          <label class="form-label" for="filterSort">Ordenação</label>
+          <select id="filterSort" class="form-select">
+            <option value="newest">Mais recentes</option>
+            <option value="oldest">Mais antigas</option>
+            <option value="value_desc">Maior valor</option>
+            <option value="value_asc">Menor valor</option>
+          </select>
+        </div>
+
+        <div class="col-12 col-lg-2 d-flex align-items-end">
+          <button id="clearFiltersBtn" type="button" class="btn btn-outline-danger w-100">
+            <i class="fa-solid fa-eraser me-1"></i>
+            Limpar filtros
+          </button>
+        </div>
+      </form>
+    </div>
+    </section>
+
+    <div class="row g-3 mb-4">
+      <div class="col-12 col-sm-6 col-xl-3">
+        <div class="history-metric-card is-income">
+          <div class="history-metric-label">
+            <i class="fa-solid fa-arrow-down-long"></i>
+            Entradas
+          </div>
+          <strong id="summaryIncome">R$ 0,00</strong>
+        </div>
+      </div>
+
+      <div class="col-12 col-sm-6 col-xl-3">
+        <div class="history-metric-card is-expense">
+          <div class="history-metric-label">
+            <i class="fa-solid fa-arrow-up-long"></i>
+            Saídas
+          </div>
+          <strong id="summaryExpense">R$ 0,00</strong>
+        </div>
+      </div>
+
+      <div class="col-12 col-sm-6 col-xl-3">
+        <div class="history-metric-card is-balance">
+          <div class="history-metric-label">
+            <i class="fa-solid fa-scale-balanced"></i>
+            Saldo
+          </div>
+          <strong id="summaryBalance">R$ 0,00</strong>
+        </div>
+      </div>
+
+      <div class="col-12 col-sm-6 col-xl-3">
+        <div class="history-metric-card is-count">
+          <div class="history-metric-label">
+            <i class="fa-solid fa-hashtag"></i>
+            Lançamentos
+          </div>
+          <strong id="summaryCount">0</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="card p-3 p-md-4 shadow-sm history-results-card">
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+        <h5 class="mb-0">
+          <i class="fa-solid fa-list-ul me-2"></i>
+          Resultado
+        </h5>
+        <span class="history-page-state" id="historyPageState">Página 1 de 1</span>
+      </div>
+
+      <div id="historyCards" class="row g-3"></div>
+
+      <div id="historyTableWrap" class="table-responsive d-none">
+        <table class="table align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Categoria</th>
+              <th>Grupo</th>
+              <th>Membro</th>
+              <th>Tipo</th>
+              <th class="text-end">Valor</th>
+              <th class="text-end">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody"></tbody>
+        </table>
+      </div>
+
+      <div id="historyEmpty" class="history-empty-state d-none">
+        <i class="fa-solid fa-receipt"></i>
+        <h6>Nenhum lançamento encontrado</h6>
+        <p>Altere os filtros para ampliar a busca.</p>
+      </div>
+
+      <div class="history-pagination mt-4">
+        <button id="prevPageBtn" type="button" class="btn btn-outline-secondary btn-sm">
+          <i class="fa-solid fa-chevron-left me-1"></i>
+          Anterior
+        </button>
+        <span id="pageInfo">Página 1 de 1</span>
+        <button id="nextPageBtn" type="button" class="btn btn-outline-secondary btn-sm">
+          Próxima
+          <i class="fa-solid fa-chevron-right ms-1"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="historyEditModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="fa-solid fa-pen me-2"></i>
+            Editar transação
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-2">
+            <label class="form-label" for="historyEditType">Tipo</label>
+            <select class="form-select" id="historyEditType">
+              <option value="income">Entrada</option>
+              <option value="expense">Saída</option>
+            </select>
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label" for="historyEditValue">Valor</label>
+            <input
+              type="text"
+              inputmode="decimal"
+              autocomplete="off"
+              class="form-control"
+              id="historyEditValue"
+              data-money-mask="brl"
+            />
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label" for="historyEditCategory">Categoria</label>
+            <select class="form-select" id="historyEditCategory"></select>
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label" for="historyEditGroup">Grupo</label>
+            <select class="form-select" id="historyEditGroup">
+              <option value="fixed">Fixo</option>
+              <option value="variable">Variável</option>
+              <option value="planned">Previsto</option>
+              <option value="unexpected">Imprevisto</option>
+            </select>
+          </div>
+
+          <div class="mb-0">
+            <label class="form-label" for="historyEditDate">Data</label>
+            <input type="date" class="form-control" id="historyEditDate" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancelar</button>
+          <button class="btn btn-success" id="historySaveEditBtn" type="button">
+            <i class="fa-solid fa-check me-1"></i>
+            Salvar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="historyDeleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="fa-solid fa-triangle-exclamation text-danger me-2"></i>
+            Confirmar exclusão
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-1">Tem certeza que deseja excluir esta transação?</p>
+          <p class="text-muted small mb-0">Essa ação não poderá ser desfeita.</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancelar</button>
+          <button class="btn btn-danger" id="historyConfirmDeleteBtn" type="button">
+            <i class="fa-solid fa-trash me-1"></i>
+            Excluir
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="exportCsvOptionsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="fa-solid fa-file-csv me-2"></i>
+            Exportar CSV
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-3 text-muted small">Escolha como deseja exportar o histórico filtrado.</p>
+
+          <div class="mb-3">
+            <span class="fw-semibold d-block mb-2">Modelo de relatório</span>
+            <div class="form-check mb-1">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="csvExportMode"
+                id="exportCsvModeComplete"
+                value="complete"
+                checked
+              />
+              <label class="form-check-label" for="exportCsvModeComplete">
+                Completo (todas as colunas)
+              </label>
+            </div>
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="csvExportMode"
+                id="exportCsvModeEssentials"
+                value="essentials"
+              />
+              <label class="form-check-label" for="exportCsvModeEssentials">
+                Essencial (resumido para análise rápida)
+              </label>
+            </div>
+          </div>
+
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="exportCsvIncludeMetadata" />
+            <label class="form-check-label" for="exportCsvIncludeMetadata">
+              Incluir resumo com filtros e totais
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="exportCsvIncludeImpact" checked />
+            <label class="form-check-label" for="exportCsvIncludeImpact">
+              Incluir coluna de impacto no saldo
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancelar</button>
+          <button class="btn btn-success" id="exportCsvConfirmBtn" type="button">
+            <i class="fa-solid fa-download me-1"></i>
+            Exportar agora
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/pwa.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/idleLogout.js"></script>
+  <script src="js/loadNavbar.js"></script>
+  <script src="js/profileMenu.js"></script>
+  <script src="js/history.js"></script>
+</body>
+</html>

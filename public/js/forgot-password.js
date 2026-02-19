@@ -1,13 +1,3 @@
-// public/js/forgot-password.js
-
-/**
- * =========================================================
- * FORGOT PASSWORD
- * - Envia email de recuperação
- * - Mostra estado de sucesso (sem script inline no HTML)
- * =========================================================
- */
-
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("forgotForm");
   if (!form) return;

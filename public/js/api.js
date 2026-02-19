@@ -1,11 +1,9 @@
-// public/js/api.js
-
 const API_URL = window.__API_URL__;
 
 const TOKEN_KEY = "token";
 const USER_KEY = "user";
 const LOGOUT_SYNC_KEY = "logout_at";
-const LAST_ACTIVITY_KEY = "last_activity_at"; // novo
+const LAST_ACTIVITY_KEY = "last_activity_at";
 
 function getToken() {
   return localStorage.getItem(TOKEN_KEY);
@@ -19,23 +17,15 @@ function logout(reason = "logout") {
   try {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
-
-    // remove também o last activity para não “herdar” timestamp antigo
     localStorage.removeItem(LAST_ACTIVITY_KEY);
-
-    // avisa outras abas (storage event dispara nas outras abas) [web:144]
     localStorage.setItem(LOGOUT_SYNC_KEY, Date.now().toString());
   } catch (_) {}
 
   if (typeof showAlert === "function" && !window.location.pathname.endsWith("index.html")) {
-    const message =
-      reason === "idle"
-        ? "Sessão expirada. Faça login novamente."
-        : "Sessão expirada. Faça login novamente.";
+    const message = "Sessão expirada. Faça login novamente.";
 
     showAlert(message, "warning", "triangle-exclamation");
 
-    // dá tempo de ler a mensagem [web:104]
     setTimeout(() => {
       if (!window.location.pathname.endsWith("index.html")) {
         window.location.href = "index.html?reason=" + encodeURIComponent(reason);
@@ -53,7 +43,7 @@ function logout(reason = "logout") {
 window.appLogout = logout;
 
 window.addEventListener("storage", (e) => {
-  if (e.key === LOGOUT_SYNC_KEY) logout("sync"); // [web:144]
+  if (e.key === LOGOUT_SYNC_KEY) logout("sync");
 });
 
 async function apiFetch(url, methodOrOptions = "GET", body = null) {

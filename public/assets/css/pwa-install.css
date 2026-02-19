@@ -1,6 +1,8 @@
 :root {
   --pwa-primary: var(--mf-primary, #3b82f6);
   --pwa-primary-rgb: var(--mf-primary-rgb, 59, 130, 246);
+  --pwa-primary-dark: var(--mf-primary-dark, #1e40af);
+  --pwa-primary-light: var(--mf-primary-light, #60a5fa);
   --pwa-bg: #0f172a;
   --pwa-bg-2: #0b1222;
   --pwa-border: rgba(255, 255, 255, 0.12);
@@ -37,7 +39,7 @@
   border: 1px solid var(--pwa-border);
   background:
     radial-gradient(circle at 10% 20%, rgba(var(--pwa-primary-rgb), 0.18), transparent 45%),
-    radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.14), transparent 45%),
+    radial-gradient(circle at 90% 80%, rgba(var(--pwa-primary-rgb), 0.1), transparent 45%),
     linear-gradient(180deg, var(--pwa-bg), var(--pwa-bg-2));
   box-shadow: var(--pwa-shadow);
   color: var(--pwa-text);
@@ -49,7 +51,7 @@
   position: absolute;
   inset: 0;
   border-top: 3px solid transparent;
-  border-image: linear-gradient(90deg, var(--pwa-primary), #06b6d4) 1;
+  border-image: linear-gradient(90deg, var(--pwa-primary-dark), var(--pwa-primary-light)) 1;
   pointer-events: none;
 }
 
@@ -103,7 +105,7 @@
 }
 
 .pwa-btn--primary {
-  background: linear-gradient(135deg, var(--pwa-primary), #2563eb);
+  background: linear-gradient(135deg, var(--pwa-primary-dark), var(--pwa-primary));
   color: #0b0f1a;
   box-shadow: 0 12px 26px rgba(var(--pwa-primary-rgb), 0.25);
 }

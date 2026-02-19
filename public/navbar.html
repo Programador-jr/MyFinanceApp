@@ -1,107 +1,69 @@
-<!-- navbar.html -->
-
 <nav class="navbar navbar-expand-lg navbar-dark fixed-top shadow-sm mf-navbar">
   <div class="container">
-    <a class="navbar-brand" href="dashboard.html">
-      <i class="fa-solid fa-wallet"></i>
-      <span>MyFinance</span>
+    <a class="navbar-brand mf-brand-logo" href="dashboard.html" aria-label="MyFinance">
+      <img
+        src="assets/icons/logo.png"
+        alt="MyFinance"
+        class="mf-brand-img"
+        loading="eager"
+        decoding="async"
+      />
     </a>
 
-    <button
-      class="navbar-toggler"
-      type="button"
-      data-bs-toggle="collapse"
-      data-bs-target="#mainNav"
-      aria-controls="mainNav"
-      aria-expanded="false"
-      aria-label="Alternar navegação"
-    >
-      <span class="navbar-toggler-icon"></span>
-    </button>
+    <ul class="navbar-nav ms-4 me-auto d-none d-lg-flex">
+      <li class="nav-item">
+        <a class="nav-link js-route-link" href="dashboard.html" data-route="dashboard.html">
+          <i class="fa-solid fa-gauge-high me-1"></i>Dashboard
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link js-route-link" href="transactions.html" data-route="transactions.html">
+          <i class="fa-solid fa-list-check me-1"></i>Lançamentos
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link js-route-link" href="boxes.html" data-route="boxes.html">
+          <i class="fa-solid fa-box me-1"></i>Caixinhas
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link js-route-link" href="contas.html" data-route="contas.html">
+          <i class="fa-solid fa-wallet me-1"></i>Contas
+        </a>
+      </li>
+    </ul>
 
-    <div class="collapse navbar-collapse" id="mainNav">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item">
-          <a class="nav-link" href="dashboard.html">
-            <i class="fa-solid fa-chart-line me-1"></i>Dashboard
-          </a>
-        </li>
+    <div class="ms-auto d-flex align-items-center gap-2">
+      <button
+        class="mf-mobile-combo-btn d-lg-none"
+        id="mobileComboBtn"
+        type="button"
+        aria-label="Abrir menu"
+        aria-controls="mfSidebar"
+        aria-expanded="false"
+      >
+        <img id="mobileAvatarImg" class="mf-mobile-avatar d-none" alt="Avatar" />
+        <span id="mobileAvatarFallback" class="mf-mobile-avatar-fallback">U</span>
 
-        <li class="nav-item">
-          <a class="nav-link" href="transactions.html">
-            <i class="fa-solid fa-arrows-rotate me-1"></i>Lançamentos
-          </a>
-        </li>
+        <span class="mf-mobile-toggle-chip" aria-hidden="true">
+          <span class="mf-mobile-toggle-icon" aria-hidden="true"></span>
+        </span>
+      </button>
 
-        <li class="nav-item">
-          <a class="nav-link" href="boxes.html">
-            <i class="fa-solid fa-piggy-bank me-1"></i>Caixinhas
-          </a>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link" href="categories.html">
-            <i class="fa-solid fa-tags me-1"></i>Categorias
-          </a>
-        </li>
-      </ul>
-
-      <div class="d-flex align-items-center gap-2">
-        <!-- Tema (claro/escuro/sistema) -->
-        <div class="dropdown">
-          <button
-            class="btn btn-sm btn-outline-light dropdown-toggle d-flex align-items-center"
-            id="themeBtn"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
-            type="button"
-          >
-            <i class="fa-solid fa-display me-1"></i>
-            <span class="d-none d-sm-inline">Tema</span>
-          </button>
-
-          <ul class="dropdown-menu dropdown-menu" aria-labelledby="themeBtn">
-            <li>
-              <button class="dropdown-item theme-option" data-theme="system" type="button">
-                <i class="fa-solid fa-display me-2"></i>Sistema
-              </button>
-            </li>
-            <li>
-              <button class="dropdown-item theme-option" data-theme="dark" type="button">
-                <i class="fa-solid fa-moon me-2"></i>Escuro
-              </button>
-            </li>
-            <li>
-              <button class="dropdown-item theme-option" data-theme="light" type="button">
-                <i class="fa-solid fa-sun me-2"></i>Claro
-              </button>
-            </li>
-          </ul>
-        </div>
-
-        <!-- Instalar PWA -->
+      <div class="d-none d-lg-flex align-items-center gap-2">
         <button
-          id="pwaInstallBtn"
-          class="btn btn-sm btn-outline-light pwa-install-btn d-none"
+          id="themeToggleBtn"
+          class="mf-theme-icon-btn"
           type="button"
+          aria-label="Alternar tema"
+          title="Alternar tema"
         >
-          <i class="fa-solid fa-download me-1"></i>
-          <span class="d-none d-sm-inline">Instalar</span>
+          <span class="mf-theme-icon-stack" aria-hidden="true">
+            <i class="fa-solid fa-sun theme-icon-sun"></i>
+            <i class="fa-solid fa-moon theme-icon-moon"></i>
+          </span>
         </button>
 
-        <!-- Código da família -->
-        <button
-          id="openInviteBtn"
-          class="btn btn-sm btn-outline-light"
-          data-bs-toggle="modal"
-          data-bs-target="#inviteModal"
-          type="button"
-        >
-          <i class="fa-solid fa-key me-1"></i>
-          <span class="d-none d-sm-inline">Código</span>
-        </button>
-
-        <!-- Perfil (substitui o botão Sair) -->
         <div class="dropdown" id="userMenu">
           <button
             class="btn btn-sm btn-outline-light d-flex align-items-center justify-content-center p-0 user-avatar-btn"
@@ -120,8 +82,8 @@
               <div class="d-flex align-items-center gap-2">
                 <div class="user-avatar-badge" id="userAvatarBadge"></div>
                 <div class="flex-grow-1">
-                  <div class="small text-muted">Bem vindo de volta</div>
-                  <div class="fw-bold" id="userDisplayName">Usuário</div>
+                  <div class="small text-muted">Bem-vindo de volta</div>
+                  <div class="fw-bold" id="userDisplayName">Usuario</div>
                 </div>
               </div>
             </li>
@@ -129,29 +91,77 @@
             <li><hr class="dropdown-divider my-2" /></li>
 
             <li class="px-2 d-grid gap-2">
-              <button class="btn btn-sm btn-outline-primary" id="openEditNameModalBtn" type="button">
-                <i class="fa-solid fa-user-pen me-2"></i>Alterar nome
-              </button>
-
-              <button class="btn btn-sm btn-outline-primary" id="openEditAvatarModalBtn" type="button">
-                <i class="fa-solid fa-image me-2"></i>Alterar avatar
+              <button
+                id="pwaInstallBtn"
+                class="btn btn-sm btn-outline-primary d-none"
+                type="button"
+              >
+                <i class="fa-solid fa-download me-2"></i>Instalar
               </button>
             </li>
 
-            <li class="px-2 mt-2">
+            <li class="px-2 mt-2 mb-2">
               <div class="small text-muted mb-1">Cor do perfil</div>
-              <div class="d-flex gap-2" id="profileColorPicker">
+              <div class="d-flex gap-2 profile-color-picker" id="profileColorPicker">
                 <button class="profile-color" type="button" data-color="blue" title="Azul"></button>
                 <button class="profile-color" type="button" data-color="purple" title="Roxo"></button>
                 <button class="profile-color" type="button" data-color="yellow" title="Amarelo"></button>
                 <button class="profile-color" type="button" data-color="red" title="Vermelho"></button>
+                <button class="profile-color" type="button" data-color="mint" title="#00FA9A"></button>
+                <button class="profile-color" type="button" data-color="spring" title="#00FF7F"></button>
+                <button class="profile-color" type="button" data-color="magenta" title="#D02090"></button>
               </div>
+            </li>
+
+            <li class="px-2 mb-2 d-grid gap-2">
+              <button
+                id="openInviteBtn"
+                class="btn btn-sm btn-outline-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#inviteModal"
+                type="button"
+              >
+                <i class="fa-solid fa-key me-2"></i>Código de convite
+              </button>
             </li>
 
             <li><hr class="dropdown-divider my-2" /></li>
 
-            <li class="px-2">
+            <li class="px-2 d-grid gap-2">
+              <a
+                class="btn btn-sm btn-outline-secondary js-route-link"
+                href="history.html"
+                data-route="history.html"
+              >
+                <i class="fa-solid fa-clock-rotate-left me-2"></i>Histórico
+              </a>
+
+              <a
+                class="btn btn-sm btn-outline-secondary js-route-link"
+                href="categories.html"
+                data-route="categories.html"
+              >
+                <i class="fa-solid fa-tags me-2"></i>Categorias
+              </a>
+
+              <a
+                class="btn btn-sm btn-outline-secondary js-route-link"
+                href="family.html"
+                data-route="family.html"
+              >
+                <i class="fa-solid fa-people-roof me-2"></i>Família
+              </a>
+
+              <a
+                class="btn btn-sm btn-outline-secondary js-route-link"
+                href="settings.html"
+                data-route="settings.html"
+              >
+                <i class="fa-solid fa-gear me-2"></i>Configuraçoes
+              </a>
+
               <button
+                id="openLogoutBtnDesktop"
                 class="btn btn-sm btn-danger"
                 data-bs-toggle="modal"
                 data-bs-target="#logoutConfirmModal"
@@ -162,59 +172,217 @@
             </li>
           </ul>
         </div>
-
-        <!-- Modal editar nome -->
-        <div class="modal fade" id="editNameModal" tabindex="-1" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title">
-                  <i class="fa-solid fa-user-pen text-primary me-2"></i>Alterar nome
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-              </div>
-              <div class="modal-body">
-                <label class="form-label">Nome</label>
-                <input id="profileNameInput" class="form-control" placeholder="Seu nome" />
-              </div>
-              <div class="modal-footer">
-                <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancelar</button>
-                <button class="btn btn-primary" id="saveProfileNameBtn" type="button">
-                  <i class="fa-solid fa-check me-2"></i>Salvar
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Modal editar avatar -->
-        <div class="modal fade" id="editAvatarModal" tabindex="-1" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title">
-                  <i class="fa-solid fa-image text-primary me-2"></i>Alterar avatar
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-              </div>
-              <div class="modal-body">
-                <label class="form-label">Escolha uma imagem</label>
-                <input id="profileAvatarInput" type="file" class="form-control" accept="image/*" />
-                <div class="form-text">Tamanho máximo recomendado: 1MB.</div>
-              </div>
-              <div class="modal-footer">
-                <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Fechar</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
       </div>
     </div>
   </div>
 </nav>
 
-<!-- INVITE CODE MODAL -->
+<div class="mf-overlay d-lg-none" id="mfOverlay"></div>
+
+<aside class="mf-sidebar d-lg-none" id="mfSidebar" aria-label="Menu lateral">
+  <div class="mf-sidebar-header">
+    <h2 class="mf-sidebar-title">
+      <i class="fa-solid fa-layer-group"></i>
+      Menu
+    </h2>
+
+    <button class="mf-close" id="mfSidebarClose" type="button" aria-label="Fechar menu">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+
+  <div class="mf-sidebar-profile">
+    <img id="mobileSidebarAvatarImg" class="mf-sidebar-avatar d-none" alt="Avatar" />
+    <span id="mobileSidebarAvatarFallback" class="mf-sidebar-avatar-fallback">U</span>
+
+    <div class="flex-grow-1">
+      <div class="small text-muted">Conta</div>
+      <div class="fw-bold" id="mobileUserDisplayName">Usuario</div>
+    </div>
+
+    <div class="mf-sidebar-avatar-badge" id="mobileUserAvatarBadge"></div>
+  </div>
+
+  <div class="mf-section">
+    <div class="mf-section-title">Aparencia</div>
+    <div class="mf-theme-modes" role="group" aria-label="Tema">
+      <button class="mf-theme-mode theme-option" data-theme="system" type="button">
+        <span class="icon"><i class="fa-solid fa-display"></i></span>
+        <span class="text">
+          <strong>Sistema</strong>
+          <small>Acompanha o dispositivo</small>
+        </span>
+      </button>
+
+      <button class="mf-theme-mode theme-option" data-theme="dark" type="button">
+        <span class="icon"><i class="fa-solid fa-moon"></i></span>
+        <span class="text">
+          <strong>Escuro</strong>
+          <small>Mais conforto no noturno</small>
+        </span>
+      </button>
+
+      <button class="mf-theme-mode theme-option" data-theme="light" type="button">
+        <span class="icon"><i class="fa-solid fa-sun"></i></span>
+        <span class="text">
+          <strong>Claro</strong>
+          <small>Visual limpo e objetivo</small>
+        </span>
+      </button>
+    </div>
+
+    <div class="small text-muted mt-3 mb-2">Cor do perfil</div>
+    <div class="mf-colors profile-color-picker" id="mobileProfileColorPicker">
+      <button class="profile-color" type="button" data-color="blue" title="Azul"></button>
+      <button class="profile-color" type="button" data-color="purple" title="Roxo"></button>
+      <button class="profile-color" type="button" data-color="yellow" title="Amarelo"></button>
+      <button class="profile-color" type="button" data-color="red" title="Vermelho"></button>
+      <button class="profile-color" type="button" data-color="mint" title="#00FA9A"></button>
+      <button class="profile-color" type="button" data-color="spring" title="#00FF7F"></button>
+      <button class="profile-color" type="button" data-color="magenta" title="#D02090"></button>
+    </div>
+  </div>
+
+  <div class="mf-section">
+    <div class="mf-section-title">Família</div>
+    <a class="mf-item w-100 text-start js-route-link" href="family.html" data-route="family.html">
+      <i class="fa-solid fa-people-roof"></i> <span>Gerenciar família</span>
+    </a>
+  </div>
+
+  <div class="mf-section">
+    <div class="mf-section-title">Sessão</div>
+    <button class="mf-item w-100 text-start" id="openLogoutBtnMobile" type="button">
+      <i class="fa-solid fa-right-from-bracket"></i> <span>Sair</span>
+    </button>
+  </div>
+</aside>
+
+<nav class="mf-bottom-nav d-lg-none" aria-label="Navegação inferior">
+  <div class="mf-nav">
+    <a href="dashboard.html" class="js-route-link" data-route="dashboard.html">
+      <i class="fa-solid fa-gauge-high"></i>
+      <span>Dashboard</span>
+    </a>
+
+    <a href="transactions.html" class="js-route-link" data-route="transactions.html">
+      <i class="fa-solid fa-list-check"></i>
+      <span>Lanc.</span>
+    </a>
+
+    <a href="boxes.html" class="js-route-link" data-route="boxes.html">
+      <i class="fa-solid fa-box"></i>
+      <span>Caixinhas</span>
+    </a>
+
+    <a href="contas.html" class="js-route-link" data-route="contas.html">
+      <i class="fa-solid fa-wallet"></i>
+      <span>Contas</span>
+    </a>
+
+    <a href="#" id="mobileMoreBtn">
+      <i class="fa-solid fa-ellipsis"></i>
+      <span>Mais</span>
+    </a>
+  </div>
+</nav>
+
+<div class="modal fade mf-sheet" id="mobileMoreSheet" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="sheet-handle"></div>
+
+      <div class="modal-header">
+        <div class="modal-title">
+          <i class="fa-solid fa-grid-2"></i>
+          Atalhos
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="mf-sheet-grid">
+          <a class="mf-sheet-item js-route-link" href="history.html" data-route="history.html">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            <div>
+              <div class="t1">Histórico</div>
+              <div class="t2">Lançamentos completos</div>
+            </div>
+          </a>
+
+          <a class="mf-sheet-item js-route-link" href="categories.html" data-route="categories.html">
+            <i class="fa-solid fa-tags"></i>
+            <div>
+              <div class="t1">Categorias</div>
+              <div class="t2">Gerenciar categorias</div>
+            </div>
+          </a>
+
+          <a class="mf-sheet-item js-route-link" href="settings.html" data-route="settings.html">
+            <i class="fa-solid fa-gear"></i>
+            <div>
+              <div class="t1">Configuraçoes</div>
+              <div class="t2">Conta e preferencias</div>
+            </div>
+          </a>
+
+          <a class="mf-sheet-item js-route-link" href="family.html" data-route="family.html">
+            <i class="fa-solid fa-people-roof"></i>
+            <div>
+              <div class="t1">Família</div>
+              <div class="t2">Gerenciar membros</div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="editNameModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fa-solid fa-user-pen text-primary me-2"></i>Alterar nome
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <label class="form-label">Nome</label>
+        <input id="profileNameInput" class="form-control" placeholder="Seu nome" />
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancelar</button>
+        <button class="btn btn-primary" id="saveProfileNameBtn" type="button">
+          <i class="fa-solid fa-check me-2"></i>Salvar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="editAvatarModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fa-solid fa-image text-primary me-2"></i>Alterar avatar
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <label class="form-label">Escolha uma imagem</label>
+        <input id="profileAvatarInput" type="file" class="form-control" accept="image/*" />
+        <div class="form-text">Tamanho maximo recomendado: 1MB.</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal fade" id="inviteModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-sm modal-dialog-centered">
     <div class="modal-content">

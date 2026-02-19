@@ -10,36 +10,33 @@
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
-   <link href="assets/css/navbar.css" rel="stylesheet" />
+  <link href="assets/css/navbar.css" rel="stylesheet" />
   <link href="assets/css/categories.css" rel="stylesheet" />
+  <link href="assets/css/light-mode.css" rel="stylesheet" />
 </head>
 
 <body>
-  <!-- NAVBAR -->
   <div id="loadNavbar"></div>
 
-
-  <!-- ALERT CONTAINER -->
   <div
     id="alert-container"
     class="position-fixed top-0 start-50 translate-middle-x mt-3"
     style="z-index: 1055; width: 90%; max-width: 420px;"
   ></div>
 
-  <!-- INVITE CODE MODAL (reuso do padrão) -->
   <div class="modal fade" id="inviteModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-sm modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
           <h6 class="modal-title">
-            <i class="fa-solid fa-people-roof"></i> Código da família
+            <i class="fa-solid fa-people-roof"></i> C&oacute;digo da fam&iacute;lia
           </h6>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
 
         <div class="modal-body">
           <div class="mb-2">
-            <label class="form-label small">Código</label>
+            <label class="form-label small">C&oacute;digo</label>
             <input id="inviteCodeInput" class="form-control invite-code-input" readonly />
           </div>
 
@@ -56,20 +53,19 @@
     </div>
   </div>
 
-  <!-- MODAL CONFIRMAR LOGOUT -->
   <div class="modal fade" id="logoutConfirmModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">
-            <i class="fa-solid fa-right-from-bracket text-danger me-2"></i> Confirmar saída
+            <i class="fa-solid fa-right-from-bracket text-danger me-2"></i> Confirmar sa&iacute;da
           </h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
 
         <div class="modal-body">
           <p>Tem certeza que deseja sair do MyFinance?</p>
-          <p class="text-muted small">Você será desconectado e redirecionado para a página de login.</p>
+          <p class="text-muted small">Voc&ecirc; ser&aacute; desconectado e redirecionado para a p&aacute;gina de login.</p>
         </div>
 
         <div class="modal-footer">
@@ -80,36 +76,73 @@
     </div>
   </div>
 
-  <!-- CONTEÚDO -->
   <div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
       <h3 class="mb-0">
         <i class="fa-solid fa-tags"></i> Categorias
       </h3>
 
-      <button class="btn btn-primary" id="openCreateCategoryBtn" type="button">
-        <i class="fa-solid fa-plus me-1"></i> Nova categoria
-      </button>
+      <div class="d-flex flex-column flex-sm-row gap-2">
+        <button class="btn btn-primary btn-cta-gradient" id="openCreateCategoryBtn" type="button">
+          <i class="fa-solid fa-plus me-2"></i>Nova categoria
+        </button>
+      </div>
     </div>
-
     <div class="card p-4 shadow-sm">
-      <div class="table-responsive">
-        <table class="table table-striped align-middle">
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+        <h5 class="mb-0">Lista de categorias</h5>
+        <div class="d-flex flex-wrap align-items-center gap-2">
+          <span id="categoriesCountBadge" class="categories-count-badge">0 categorias</span>
+          <select id="categoriesFilterSelect" class="form-select categories-filter-select" aria-label="Filtrar categorias">
+            <option value="all">Todas</option>
+            <option value="income">Entrada</option>
+            <option value="expense">Saída</option>
+            <option value="custom">Minhas</option>
+            <option value="system">Sistema</option>
+          </select>
+          <div class="btn-group categories-view-switch" role="group" aria-label="Modo de visualizacao">
+            <button
+              id="categoriesViewCardsBtn"
+              type="button"
+              class="btn btn-outline-primary categories-view-btn"
+              aria-pressed="true"
+            >
+              <i class="fa-solid fa-table-cells-large me-1"></i>
+              Cards
+            </button>
+            <button
+              id="categoriesViewTableBtn"
+              type="button"
+              class="btn btn-outline-primary categories-view-btn"
+              aria-pressed="false"
+            >
+              <i class="fa-solid fa-table me-1"></i>
+              Tabela
+            </button>
+          </div>
+        </div>
+      </div>
+      <div id="categoriesCardsWrap" class="row g-3"></div>
+      <div id="categoriesTableWrap" class="table-responsive d-none">
+        <table class="table table-striped align-middle mb-0">
           <thead>
             <tr>
               <th>Nome</th>
               <th>Tipo</th>
               <th>Origem</th>
-              <th class="text-end">Ações</th>
+              <th class="text-end">Acoes</th>
             </tr>
           </thead>
           <tbody id="categoriesTable"></tbody>
         </table>
       </div>
+      <div id="categoriesEmptyState" class="empty-state d-none">
+        <i class="fa-solid fa-tags"></i>
+        <h6>Nenhuma categoria encontrada</h6>
+      </div>
     </div>
   </div>
 
-  <!-- MODAL CRIAR/EDITAR CATEGORIA -->
   <div class="modal fade" id="categoryEditorModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
@@ -124,19 +157,19 @@
         <div class="modal-body">
           <div class="mb-3">
             <label class="form-label">Nome</label>
-            <input type="text" class="form-control" id="categoryNameInput" placeholder="Ex: Alimentação" />
+            <input type="text" class="form-control" id="categoryNameInput" placeholder="Ex: Alimenta&ccedil;&atilde;o" />
           </div>
 
           <div class="mb-3">
             <label class="form-label">Tipo</label>
             <select class="form-select" id="categoryTypeSelect">
               <option value="income">Entrada</option>
-              <option value="expense">Saída</option>
+              <option value="expense">Sa&iacute;da</option>
             </select>
           </div>
 
           <div class="small text-muted" id="categoryEditorHint" style="display:none;">
-            Categorias do sistema não podem ser editadas.
+            Categorias do sistema n&atilde;o podem ser editadas.
           </div>
         </div>
 
@@ -150,20 +183,19 @@
     </div>
   </div>
 
-  <!-- MODAL CONFIRMAR EXCLUSÃO -->
   <div class="modal fade" id="deleteCategoryModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">
-            <i class="fa-solid fa-triangle-exclamation text-danger me-2"></i> Confirmar exclusão
+            <i class="fa-solid fa-triangle-exclamation text-danger me-2"></i> Confirmar exclus&atilde;o
           </h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
 
         <div class="modal-body">
           <p>Tem certeza que deseja excluir esta categoria?</p>
-          <p class="text-muted small">Esta ação não pode ser desfeita.</p>
+          <p class="text-muted small">Esta a&ccedil;&atilde;o n&atilde;o pode ser desfeita.</p>
         </div>
 
         <div class="modal-footer">
@@ -174,9 +206,9 @@
     </div>
   </div>
 
-  <!-- SCRIPTS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="/config.js"></script>`r`n  <script src="js/api.js"></script>
+  <script src="/config.js"></script>
+  <script src="js/api.js"></script>
   <script src="js/pwa.js"></script>
   <script src="js/utils.js"></script>
   <script src="js/idleLogout.js"></script>
@@ -185,4 +217,7 @@
   <script src="js/profileMenu.js"></script>
 </body>
 </html>
+
+
+
 

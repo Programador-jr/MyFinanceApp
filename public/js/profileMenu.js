@@ -1,5 +1,3 @@
-// js/profileMenu.js
-
 function getToken() {
   return localStorage.getItem("token");
 }
@@ -45,18 +43,170 @@ function getLoggedUser() {
 }
 
 function pickInitial(name) {
-  const s = (name || "").trim();
+  const s = String(name || "").trim();
   return s ? s[0].toUpperCase() : "U";
 }
 
-function colorHex(color) {
-  const map = {
-    blue: "#3b82f6",
-    purple: "#4a24a3",
-    yellow: "#f59e0b",
-    red: "#ef4444",
+function getProfileColorConfigSafe() {
+  const fallback = {
+    default: "blue",
+    colors: [
+      { key: "blue", label: "Azul", hex: "#3b82f6" },
+      { key: "purple", label: "Roxo", hex: "#4a24a3" },
+      { key: "yellow", label: "Amarelo", hex: "#f59e0b" },
+      { key: "red", label: "Vermelho", hex: "#ef4444" },
+    ],
   };
-  return map[color] || map.blue;
+
+  if (typeof window.getProfileColorConfig === "function") {
+    try {
+      const config = window.getProfileColorConfig();
+      if (config && Array.isArray(config.colors) && config.colors.length) return config;
+    } catch {
+      // use fallback
+    }
+  }
+
+  return fallback;
+}
+
+function getProfileColorItems() {
+  const config = getProfileColorConfigSafe();
+  return Array.isArray(config.colors) ? config.colors : [];
+}
+
+function getDefaultProfileColorKey() {
+  const config = getProfileColorConfigSafe();
+  const items = getProfileColorItems();
+  if (!items.length) return "blue";
+  const defaultKey = String(config.default || "").trim().toLowerCase();
+  if (items.some((item) => item.key === defaultKey)) return defaultKey;
+  return items[0].key;
+}
+
+function isValidProfileColorKey(colorKey) {
+  const key = String(colorKey || "").trim().toLowerCase();
+  return getProfileColorItems().some((item) => item.key === key);
+}
+
+function escapeHtmlAttr(value) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function colorHex(color) {
+  const key = String(color || "").trim().toLowerCase();
+  const items = getProfileColorItems();
+  const defaultKey = getDefaultProfileColorKey();
+  const selected =
+    items.find((item) => item.key === key) ||
+    items.find((item) => item.key === defaultKey) ||
+    items[0];
+  return selected?.hex || "#3b82f6";
+}
+
+function renderProfileColorPickers() {
+  const items = getProfileColorItems();
+  if (!items.length) return;
+
+  const markup = items
+    .map((item) => {
+      const key = escapeHtmlAttr(item.key);
+      const title = escapeHtmlAttr(item.label || item.hex || item.key);
+      const hex = escapeHtmlAttr(item.hex || "#3b82f6");
+      return `<button class="profile-color" type="button" data-color="${key}" title="${title}" style="background:${hex}"></button>`;
+    })
+    .join("");
+
+  document.querySelectorAll(".profile-color-picker").forEach((picker) => {
+    picker.innerHTML = markup;
+  });
+}
+
+function bindProfileColorButtons() {
+  const defaultColor = getDefaultProfileColorKey();
+  document
+    .querySelectorAll(".profile-color-picker .profile-color")
+    .forEach((btn) => {
+      if (btn.dataset.profileColorBound === "1") return;
+      btn.dataset.profileColorBound = "1";
+      btn.addEventListener("click", () => {
+        const prefs = getProfile();
+        const selected = String(btn.dataset.color || "").trim().toLowerCase();
+        prefs.color = isValidProfileColorKey(selected) ? selected : defaultColor;
+        setProfile(prefs);
+        applyProfileToNavbar();
+      });
+    });
+}
+
+function getApiOrigin() {
+  const raw = (window.__API_URL__ || "http://localhost:3000").trim();
+
+  try {
+    return new URL(raw).origin;
+  } catch {
+    return raw.replace(/\/+$|\/v\d+$/gi, "");
+  }
+}
+
+function resolveAvatarUrl(avatarUrl) {
+  if (!avatarUrl) return null;
+  if (/^https?:\/\//i.test(avatarUrl)) return avatarUrl;
+
+  const origin = getApiOrigin();
+
+  try {
+    return new URL(avatarUrl, origin).toString();
+  } catch {
+    return `${origin}${avatarUrl}`;
+  }
+}
+
+function setTextById(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = value;
+}
+
+function setValueById(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.value = value;
+}
+
+function setBadgeColorById(id, colorHexValue) {
+  const el = document.getElementById(id);
+  if (el) el.style.background = colorHexValue;
+}
+
+function applyAvatar({ imgId, fallbackId, name, color, avatarUrl }) {
+  const img = document.getElementById(imgId);
+  const fallback = document.getElementById(fallbackId);
+  if (!img || !fallback) return;
+
+  const initial = pickInitial(name);
+
+  fallback.style.background = color;
+  fallback.textContent = initial;
+
+  if (avatarUrl) {
+    img.src = avatarUrl;
+    img.classList.remove("d-none");
+    fallback.classList.add("d-none");
+
+    img.onerror = () => {
+      img.classList.add("d-none");
+      fallback.classList.remove("d-none");
+      fallback.textContent = initial;
+    };
+
+    return;
+  }
+
+  img.classList.add("d-none");
+  fallback.classList.remove("d-none");
 }
 
 function ensureDefaultProfileName() {
@@ -67,59 +217,99 @@ function ensureDefaultProfileName() {
   const fallbackName =
     (user && (user.name || user.nome)) ||
     (user && user.email) ||
-    "Usuário";
+    "Usuario";
 
-  prefs.name = String(fallbackName).trim() || "Usuário";
-  if (!prefs.color) prefs.color = "blue";
+  prefs.name = String(fallbackName).trim() || "Usuario";
+  if (!isValidProfileColorKey(prefs.color)) prefs.color = getDefaultProfileColorKey();
 
   setProfile(prefs);
 }
 
-function applyProfileToNavbar() {
-  const prefs = getProfile();
-
-  const displayNameEl = document.getElementById("userDisplayName");
-  const nameInput = document.getElementById("profileNameInput");
-  const img = document.getElementById("userAvatarImg");
-  const fallback = document.getElementById("userAvatarFallback");
-  const badge = document.getElementById("userAvatarBadge");
-
-  if (!displayNameEl || !img || !fallback || !badge) return;
-
-  const name = prefs.name || "Usuário";
-  const color = prefs.color || "blue";
-
-  displayNameEl.textContent = name;
-  if (nameInput) nameInput.value = prefs.name || "";
-
-  const c = colorHex(color);
-  fallback.style.background = c;
-  badge.style.background = c;
-
-  // Preferência: avatar vindo do backend (avatarUrl)
-  // Fallback: avatar antigo em base64 (avatarDataUrl)
-  const apiBase = window.__API_URL__ || "http://localhost:3000";
-if (prefs.avatarUrl) {
-  const isAbs = /^https?:\/\//i.test(prefs.avatarUrl);
-  img.src = isAbs ? prefs.avatarUrl : (apiBase + prefs.avatarUrl);
-
-  img.classList.remove("d-none");
-  fallback.classList.add("d-none");
-} else if (prefs.avatarDataUrl) {
-  img.src = prefs.avatarDataUrl;
-  img.classList.remove("d-none");
-  fallback.classList.add("d-none");
-} else {
-  img.classList.add("d-none");
-  fallback.classList.remove("d-none");
-  fallback.textContent = pickInitial(name);
+function emitProfileUpdated(name, color) {
+  document.dispatchEvent(
+    new CustomEvent("profileUpdated", {
+      detail: {
+        name,
+        color,
+        prefs: getProfile(),
+        user: getLoggedUser(),
+      },
+    })
+  );
 }
 
-  document.querySelectorAll("#profileColorPicker .profile-color").forEach((btn) => {
-    btn.classList.toggle("active", btn.dataset.color === color);
+function applyProfileToNavbar() {
+  const prefs = getProfile();
+  const user = getLoggedUser();
+
+  const name =
+    String(
+      prefs.name ||
+        user?.name ||
+        user?.nome ||
+        user?.email ||
+        "Usuario"
+    ).trim() || "Usuario";
+
+  const colorKey = isValidProfileColorKey(prefs.color)
+    ? String(prefs.color).trim().toLowerCase()
+    : getDefaultProfileColorKey();
+  const color = colorHex(colorKey);
+  const avatarUrl = resolveAvatarUrl(prefs.avatarUrl) || prefs.avatarDataUrl || null;
+
+  setTextById("userDisplayName", name);
+  setTextById("mobileUserDisplayName", name);
+  setTextById("settingsProfileName", name);
+
+  if (user?.email) setTextById("settingsProfileEmail", user.email);
+
+  setValueById("profileNameInput", prefs.name || "");
+
+  setBadgeColorById("userAvatarBadge", color);
+  setBadgeColorById("mobileUserAvatarBadge", color);
+  setBadgeColorById("settingsAvatarBadge", color);
+
+  applyAvatar({
+    imgId: "userAvatarImg",
+    fallbackId: "userAvatarFallback",
+    name,
+    color,
+    avatarUrl,
   });
 
-  if (typeof applyAppColor === "function") applyAppColor(color);
+  applyAvatar({
+    imgId: "mobileAvatarImg",
+    fallbackId: "mobileAvatarFallback",
+    name,
+    color,
+    avatarUrl,
+  });
+
+  applyAvatar({
+    imgId: "mobileSidebarAvatarImg",
+    fallbackId: "mobileSidebarAvatarFallback",
+    name,
+    color,
+    avatarUrl,
+  });
+
+  applyAvatar({
+    imgId: "settingsAvatarImg",
+    fallbackId: "settingsAvatarFallback",
+    name,
+    color,
+    avatarUrl,
+  });
+
+  document
+    .querySelectorAll(".profile-color-picker .profile-color")
+    .forEach((btn) => {
+      btn.classList.toggle("active", btn.dataset.color === colorKey);
+    });
+
+  if (typeof applyAppColor === "function") applyAppColor(colorKey);
+
+  emitProfileUpdated(name, colorKey);
 }
 
 function closeUserDropdown() {
@@ -134,15 +324,15 @@ function openModalSafely(modalEl) {
   if (!modalEl || typeof bootstrap === "undefined") return;
 
   closeUserDropdown();
-  setTimeout(() => new bootstrap.Modal(modalEl).show(), 80);
+  setTimeout(() => {
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+  }, 80);
 }
 
-// Intercepta clique em qualquer elemento com data-bs-toggle="modal" dentro do dropdown do perfil
 function bindDropdownModalFix() {
   const userMenu = document.getElementById("userMenu");
-  if (!userMenu) return;
+  if (!userMenu || userMenu.__modalFixBound) return;
 
-  if (userMenu.__modalFixBound) return;
   userMenu.__modalFixBound = true;
 
   userMenu.addEventListener("click", (e) => {
@@ -165,114 +355,108 @@ function bindDropdownModalFix() {
 function bindProfileMenu() {
   if (window.__profileMenuBound) return;
 
-  const openNameBtn = document.getElementById("openEditNameModalBtn");
-  const openAvatarBtn = document.getElementById("openEditAvatarModalBtn");
+  bindDropdownModalFix();
+  renderProfileColorPickers();
+  bindProfileColorButtons();
 
   const saveNameBtn = document.getElementById("saveProfileNameBtn");
   const nameInput = document.getElementById("profileNameInput");
   const avatarInput = document.getElementById("profileAvatarInput");
-  const colorBtns = document.querySelectorAll("#profileColorPicker .profile-color");
-
-  if (!openNameBtn || !openAvatarBtn || !saveNameBtn || !nameInput || !avatarInput) return;
 
   window.__profileMenuBound = true;
 
-  bindDropdownModalFix();
+  if (!saveNameBtn || !nameInput || !avatarInput) return;
 
-  openNameBtn.addEventListener("click", () => {
-    const prefs = getProfile();
-    nameInput.value = prefs.name || "";
-    openModalSafely(document.getElementById("editNameModal"));
+  document.querySelectorAll('[data-profile-open="name"]').forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const prefs = getProfile();
+      nameInput.value = prefs.name || "";
+      openModalSafely(document.getElementById("editNameModal"));
+    });
   });
 
-  openAvatarBtn.addEventListener("click", () => {
-    openModalSafely(document.getElementById("editAvatarModal"));
+  document.querySelectorAll('[data-profile-open="avatar"]').forEach((btn) => {
+    btn.addEventListener("click", () => {
+      openModalSafely(document.getElementById("editAvatarModal"));
+    });
   });
 
-saveNameBtn.addEventListener("click", async () => {
-  const newName = nameInput.value.trim() || "Usuário";
+  saveNameBtn.addEventListener("click", async () => {
+    const newName = (nameInput.value || "").trim() || "Usuario";
 
-  try {
-    const data = await apiFetch("/users/me", "PATCH", { name: newName });
+    try {
+      const data = await apiFetch("/users/me", "PATCH", { name: newName });
 
-    const prefs = getProfile();
-    prefs.name = data.user?.name || newName;
-    if (!prefs.color) prefs.color = "blue";
-    setProfile(prefs);
+      const prefs = getProfile();
+      prefs.name = data.user?.name || newName;
+      if (!isValidProfileColorKey(prefs.color)) prefs.color = getDefaultProfileColorKey();
+      setProfile(prefs);
 
-    const u = getLoggedUser() || {};
-    u.name = data.user?.name || newName;
-    localStorage.setItem("user", JSON.stringify(u));
+      const user = getLoggedUser() || {};
+      user.name = data.user?.name || newName;
+      localStorage.setItem("user", JSON.stringify(user));
 
-    const modal = bootstrap.Modal.getInstance(document.getElementById("editNameModal"));
-    if (modal) modal.hide();
+      const modalEl = document.getElementById("editNameModal");
+      const modal = modalEl ? bootstrap.Modal.getInstance(modalEl) : null;
+      if (modal) modal.hide();
 
-    applyProfileToNavbar();
-    if (typeof showAlert === "function")
-      showAlert("Nome atualizado", "success", "check-circle");
-  } catch (err) {
-    // apiFetch já mostra alerta de erro
-  }
-});
+      applyProfileToNavbar();
+      if (typeof showAlert === "function") {
+        showAlert("Nome atualizado", "success", "check-circle");
+      }
+    } catch {
+      // apiFetch j? exibe erro
+    }
+  });
 
-
-  // Upload REAL do avatar para o backend
   avatarInput.addEventListener("change", async (e) => {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
 
-    // Sugestão: manter seu aviso (1MB), mas o backend pode aceitar mais.
     if (file.size > 1024 * 1024) {
-      if (typeof showAlert === "function")
-        showAlert("Imagem muito grande (máx. 1MB)", "warning", "triangle-exclamation");
+      if (typeof showAlert === "function") {
+        showAlert("Imagem muito grande (max. 1MB)", "warning", "triangle-exclamation");
+      }
       avatarInput.value = "";
       return;
     }
 
     try {
       const fd = new FormData();
-      fd.append("avatar", file); // nome do campo esperado no backend [web:95]
+      fd.append("avatar", file);
 
-      // Requer api.js atualizado para não forçar Content-Type application/json em FormData
       const data = await apiFetch("/users/me/avatar", { method: "PATCH", body: fd });
 
       const prefs = getProfile();
       prefs.avatarUrl = data?.avatarUrl || null;
-      delete prefs.avatarDataUrl; // remove base64 local
-      if (!prefs.color) prefs.color = "blue";
+      delete prefs.avatarDataUrl;
+      if (!isValidProfileColorKey(prefs.color)) prefs.color = getDefaultProfileColorKey();
       setProfile(prefs);
 
       applyProfileToNavbar();
 
-      const modal = bootstrap.Modal.getInstance(document.getElementById("editAvatarModal"));
+      const modalEl = document.getElementById("editAvatarModal");
+      const modal = modalEl ? bootstrap.Modal.getInstance(modalEl) : null;
       if (modal) modal.hide();
 
-      if (typeof showAlert === "function")
+      if (typeof showAlert === "function") {
         showAlert("Avatar atualizado", "success", "check-circle");
-    } catch (err) {
-      // apiFetch já trata e exibe alerta quando vem erro do backend
+      }
+    } catch {
+      // apiFetch j? exibe erro
     } finally {
       avatarInput.value = "";
     }
   });
 
-  colorBtns.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const prefs = getProfile();
-      prefs.color = btn.dataset.color || "blue";
-      setProfile(prefs);
-      applyProfileToNavbar();
-    });
-  });
 }
 
-// Inicialização única, pode ser chamada pelo loadNavbar.js
 function initProfileMenu() {
   ensureDefaultProfileName();
 
   const prefs = getProfile();
-  if (!prefs.color) {
-    prefs.color = "blue";
+  if (!isValidProfileColorKey(prefs.color)) {
+    prefs.color = getDefaultProfileColorKey();
     setProfile(prefs);
   }
 
@@ -280,8 +464,5 @@ function initProfileMenu() {
   applyProfileToNavbar();
 }
 
-// Mantém compatibilidade com o evento
 document.addEventListener("navbarLoaded", initProfileMenu);
-
-// Expõe para o loadNavbar.js chamar direto
 window.initProfileMenu = initProfileMenu;
