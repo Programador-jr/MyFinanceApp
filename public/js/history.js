@@ -49,6 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
     editCategory: document.getElementById("historyEditCategory"),
     editGroup: document.getElementById("historyEditGroup"),
     editDate: document.getElementById("historyEditDate"),
+    editDescription: document.getElementById("historyEditDescription"),
     saveEditBtn: document.getElementById("historySaveEditBtn"),
     deleteModalEl: document.getElementById("historyDeleteModal"),
     confirmDeleteBtn: document.getElementById("historyConfirmDeleteBtn"),
@@ -390,10 +391,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const actor = resolveActorName(raw);
     const title = resolveTitle(raw, typeLabel);
     const yieldIncome = isYieldIncome(raw);
+    const description = String(raw?.description || "").trim();
 
     const searchIndex = normalizeText(
       [
         title,
+        description,
         category,
         GROUP_LABELS[group] || group,
         actor,
@@ -415,6 +418,7 @@ document.addEventListener("DOMContentLoaded", () => {
       actor,
       actorKey: normalizeText(actor),
       title,
+      description,
       dateObj,
       dateIso: dateObj ? toLocalDateInput(dateObj) : "",
       dateLabel: formatDateTime(dateSource),
@@ -523,6 +527,7 @@ document.addEventListener("DOMContentLoaded", () => {
       category: String(els.editCategory.value || "").trim(),
       group: String(els.editGroup.value || "").trim(),
       date: String(els.editDate.value || "").trim(),
+      description: String(els.editDescription.value || "").trim(),
     };
   }
 
@@ -565,6 +570,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     els.editGroup.value = String(transaction?.group || "unexpected").trim().toLowerCase();
     els.editDate.value = toLocalDateInput(transaction?.date || transaction?.createdAt);
+    els.editDescription.value = transaction?.description || "";
     await loadEditCategories(els.editType.value, transaction?.category);
   }
 
@@ -610,6 +616,7 @@ document.addEventListener("DOMContentLoaded", () => {
         category: payload.category,
         group: payload.group,
         date: toApiDateValue(payload.date),
+        description: payload.description,
       });
 
       editModal?.hide();
@@ -813,6 +820,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 ${escapeHtml(tx.category)}
                 ${categoryExtra}
               </span>
+              ${tx.description ? `
+              <span class="history-item-meta-item">
+                <i class="fa-solid fa-align-left"></i>
+                ${escapeHtml(tx.description)}
+              </span>
+              ` : ""}
               <span class="history-item-meta-item">
                 <i class="fa-solid fa-layer-group"></i>
                 ${escapeHtml(tx.groupLabel)}
@@ -871,6 +884,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <tr>
           <td>${escapeHtml(tx.dateLabel)}</td>
           <td>${escapeHtml(tx.category)}</td>
+          <td>${escapeHtml(tx.description || "")}</td>
           <td>${escapeHtml(tx.groupLabel)}</td>
           <td>${escapeHtml(tx.actor)}</td>
           <td>
