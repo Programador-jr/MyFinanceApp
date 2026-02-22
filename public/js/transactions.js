@@ -41,6 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const editCategory = document.getElementById("editCategory");
   const editGroup = document.getElementById("editGroup");
   const editDate = document.getElementById("editDate");
+  const editDescription = document.getElementById("editDescription");
   const saveEditBtn = document.getElementById("saveEditBtn");
 
   // Modal excluir
@@ -357,7 +358,8 @@ document.addEventListener("DOMContentLoaded", () => {
       value: toAmount(editValue?.value, 0),
       category: (editCategory?.value || "").trim(),
       group: (editGroup?.value || "").trim(),
-      date: (editDate?.value || "").trim() // YYYY-MM-DD
+      date: (editDate?.value || "").trim(), // YYYY-MM-DD
+      description: (editDescription?.value || "").trim()
     };
   }
 
@@ -391,7 +393,8 @@ document.addEventListener("DOMContentLoaded", () => {
       toAmount(p.value, 0) !== toAmount(editOriginal.value, 0) ||
       p.category !== editOriginal.category ||
       p.group !== editOriginal.group ||
-      p.date !== editOriginal.date
+      p.date !== editOriginal.date ||
+      p.description !== editOriginal.description
     );
   }
 
@@ -461,6 +464,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       editDate.value = String(transaction?.date || transaction?.createdAt || "").slice(0, 10);
     }
+    editDescription.value = transaction?.description || "";
 
     await loadEditCategories(editType.value, transaction?.category);
 
@@ -469,7 +473,8 @@ document.addEventListener("DOMContentLoaded", () => {
       value: toAmount(editValue.value, 0),
       category: (editCategory.value || "").trim(),
       group: (editGroup.value || "").trim(),
-      date: (editDate.value || "").trim()
+      date: (editDate.value || "").trim(),
+      description: (editDescription.value || "").trim()
     };
   }
 
@@ -541,6 +546,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const groupLabel = groupLabels[t.group] || t.group || "-";
         const memberName = resolveMemberName(t);
         const categorySafe = escapeHtml(t?.category || "Sem categoria");
+        const descriptionSafe = t?.description ? escapeHtml(t.description) : "";
         const yieldPill = isYieldIncome
           ? '<span class="transaction-origin-pill">Liquidez diária</span>'
           : "";
@@ -601,6 +607,12 @@ document.addEventListener("DOMContentLoaded", () => {
                   <i class="fa-solid fa-tag"></i>
                   <span>${categorySafe} ${yieldPill}</span>
                 </div>
+                ${descriptionSafe ? `
+                <div class="transaction-latest-meta-item">
+                  <i class="fa-solid fa-align-left"></i>
+                  <span>${descriptionSafe}</span>
+                </div>
+                ` : ""}
                 <div class="transaction-latest-meta-item">
                   <i class="fa-solid fa-layer-group"></i>
                   <span>${escapeHtml(groupLabel)}</span>
@@ -630,6 +642,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 </span>
               </td>
               <td>${categorySafe} ${yieldPill}</td>
+              <td>${escapeHtml(t.description || "")}</td>
               <td>${escapeHtml(groupLabel)}</td>
               <td>${escapeHtml(memberName)}</td>
               <td class="text-end fw-semibold">${escapeHtml(fmtBRL(t.value))}</td>
@@ -665,7 +678,8 @@ document.addEventListener("DOMContentLoaded", () => {
         value: toAmount(document.getElementById("value").value, 0),
         category: document.getElementById("category").value,
         group: document.getElementById("group").value,
-        date: toApiDateValue(document.getElementById("date").value)
+        date: toApiDateValue(document.getElementById("date").value),
+        description: (document.getElementById("description").value || "").trim()
       };
 
       await apiFetch("/transactions", "POST", payload);
@@ -740,7 +754,8 @@ document.addEventListener("DOMContentLoaded", () => {
         value: p.value,
         category: p.category,
         group: p.group,
-        date: toApiDateValue(p.date)
+        date: toApiDateValue(p.date),
+        description: p.description
       });
 
       editModal?.hide();
@@ -915,7 +930,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Sempre que o usuário mexer nos campos do modal de edição, recalcula botão salvar
-  [editType, editValue, editCategory, editGroup, editDate].forEach((el) => {
+  [editType, editValue, editCategory, editGroup, editDate, editDescription].forEach((el) => {
     if (!el) return;
     el.addEventListener("input", updateEditSaveState);
     el.addEventListener("change", updateEditSaveState);
