@@ -1,4 +1,4 @@
-﻿document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", async () => {
   if (typeof checkAuth === "function") checkAuth();
   if (typeof initTheme === "function") initTheme();
 
@@ -651,8 +651,64 @@
     const inputValue = toNumber(accountInstallmentValueInput.value);
     const recurringValue = recurring ? inputValue : 0;
 
-    const firstPaymentDate = normalizeDateInput(accountFirstDueInput.value, "");
-    const nextDueDate = normalizeDateInput(accountNextDueInput?.value, firstPaymentDate);
+    const firstPaymentDateRaw = accountFirstDueInput.value;
+    const nextDueDateRaw = accountNextDueInput?.value;
+    const firstPaymentDate = normalizeDateInput(firstPaymentDateRaw, "");
+    let nextDueDate = normalizeDateInput(nextDueDateRaw, firstPaymentDate);
+
+    const existingAccount = editingAccountId
+      ? accounts.find((x) => x.id === editingAccountId)
+      : null;
+
+    let paidInstallments = recurring ? 0 : 0;
+    let subscriptionPayments = 0;
+    let lastPaymentAt = "";
+    let downPayment = recurring ? 0 : toNumber(accountDownInput.value);
+    let adjustmentHistory = [];
+
+    if (existingAccount) {
+      paidInstallments = recurring ? 0 : existingAccount.paidInstallments;
+      subscriptionPayments = existingAccount.subscriptionPayments;
+      lastPaymentAt = existingAccount.lastPaymentAt;
+      downPayment = recurring ? 0 : (toNumber(accountDownInput.value) || existingAccount.downPayment);
+      adjustmentHistory = existingAccount.adjustmentHistory || [];
+
+      if (nextDueDateRaw && !recurring) {
+        const existingCalc = calculateAccount(existingAccount);
+        const oldNextDueDate = existingCalc.nextDueDate;
+        const newNextDueDate = normalizeDateInput(nextDueDateRaw, "");
+
+        if (oldNextDueDate && newNextDueDate && newNextDueDate !== oldNextDueDate) {
+          const paidCount = existingAccount.paidInstallments || 0;
+          const newFirstPaymentDate = addMonthsISO(newNextDueDate, -paidCount);
+          const adjustedFirstPayment = normalizeDateInput(newFirstPaymentDate, firstPaymentDate);
+          accountFirstDueInput.value = adjustedFirstPayment;
+        }
+      }
+
+      if (recurring && nextDueDateRaw) {
+        const oldNextDueDate = existingAccount.nextDueDate;
+        const newNextDueDate = normalizeDateInput(nextDueDateRaw, "");
+
+        if (oldNextDueDate && newNextDueDate && newNextDueDate !== oldNextDueDate) {
+          const paidCount = existingAccount.subscriptionPayments || 0;
+          const baseDate = normalizeDateInput(newNextDueDate, todayISO());
+          let calculatedFirst;
+
+          if (existingAccount.billingCycle === BILLING_ANNUAL) {
+            const base = parseDateSafe(baseDate);
+            base.setFullYear(base.getFullYear() - paidCount);
+            calculatedFirst = normalizeDateInput(base, todayISO());
+          } else {
+            calculatedFirst = addMonthsISO(baseDate, -paidCount);
+          }
+
+          accountFirstDueInput.value = normalizeDateInput(calculatedFirst, firstPaymentDate);
+        }
+      }
+    }
+
+    const finalFirstPaymentDate = normalizeDateInput(accountFirstDueInput.value, "");
 
     return {
       name: String(accountNameInput.value || "").trim(),
@@ -660,15 +716,18 @@
       billingCycle,
       recurringValue,
       installmentValue: inputValue,
-      downPayment: recurring ? 0 : toNumber(accountDownInput.value),
+      downPayment,
       installments: recurring
         ? 1
         : normalizeInstallments(accountInstallmentsInput.value),
-      paidInstallments: recurring ? 0 : 0,
-      firstPaymentDate,
-      firstDueDate: firstPaymentDate,
+      paidInstallments,
+      firstPaymentDate: finalFirstPaymentDate,
+      firstDueDate: finalFirstPaymentDate,
       nextDueDate,
+      subscriptionPayments,
+      lastPaymentAt,
       category: String(accountCategorySelect.value || "").trim(),
+      adjustmentHistory,
     };
   }
 
