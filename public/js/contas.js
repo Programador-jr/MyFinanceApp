@@ -197,6 +197,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     return `${y}-${m}-${d}`;
   }
 
+  function calculatePaidInstallmentsFromDates(firstDueDate, nextDueDate) {
+    const first = parseDateSafe(firstDueDate);
+    const next = parseDateSafe(nextDueDate);
+    if (!first || !next) return 0;
+    if (first > next) return 0;
+
+    let monthsDiff = (next.getFullYear() - first.getFullYear()) * 12 +
+                  (next.getMonth() - first.getMonth());
+    return Math.max(monthsDiff, 0);
+  }
+
   function normalizeAccountType(value) {
     const raw = String(value || "").trim().toLowerCase();
     if (raw === ACCOUNT_TYPE_SUBSCRIPTION) return ACCOUNT_TYPE_SUBSCRIPTION;
@@ -527,8 +538,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     const financedAmount = installmentValue * installments;
     const totalAccountValue = downPayment + financedAmount;
 
+    const calculatedPaidFromDates = calculatePaidInstallmentsFromDates(
+      account.firstPaymentDate || account.firstDueDate,
+      account.nextDueDate
+    );
     const paidInstallments = Math.min(
-      Math.max(Math.floor(toNumber(account.paidInstallments, 0)), 0),
+      Math.max(
+        toNumber(account.paidInstallments) > 0
+          ? toNumber(account.paidInstallments)
+          : calculatedPaidFromDates,
+        0
+      ),
       installments
     );
     const paidAmount = installmentValue * paidInstallments;
@@ -672,43 +692,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       lastPaymentAt = existingAccount.lastPaymentAt;
       downPayment = recurring ? 0 : (toNumber(accountDownInput.value) || existingAccount.downPayment);
       adjustmentHistory = existingAccount.adjustmentHistory || [];
-
-      if (nextDueDateRaw && !recurring) {
-        const existingCalc = calculateAccount(existingAccount);
-        const oldNextDueDate = existingCalc.nextDueDate;
-        const newNextDueDate = normalizeDateInput(nextDueDateRaw, "");
-
-        if (oldNextDueDate && newNextDueDate && newNextDueDate !== oldNextDueDate) {
-          const paidCount = existingAccount.paidInstallments || 0;
-          const newFirstPaymentDate = addMonthsISO(newNextDueDate, -paidCount);
-          const adjustedFirstPayment = normalizeDateInput(newFirstPaymentDate, firstPaymentDate);
-          accountFirstDueInput.value = adjustedFirstPayment;
-        }
-      }
-
-      if (recurring && nextDueDateRaw) {
-        const oldNextDueDate = existingAccount.nextDueDate;
-        const newNextDueDate = normalizeDateInput(nextDueDateRaw, "");
-
-        if (oldNextDueDate && newNextDueDate && newNextDueDate !== oldNextDueDate) {
-          const paidCount = existingAccount.subscriptionPayments || 0;
-          const baseDate = normalizeDateInput(newNextDueDate, todayISO());
-          let calculatedFirst;
-
-          if (existingAccount.billingCycle === BILLING_ANNUAL) {
-            const base = parseDateSafe(baseDate);
-            base.setFullYear(base.getFullYear() - paidCount);
-            calculatedFirst = normalizeDateInput(base, todayISO());
-          } else {
-            calculatedFirst = addMonthsISO(baseDate, -paidCount);
-          }
-
-          accountFirstDueInput.value = normalizeDateInput(calculatedFirst, firstPaymentDate);
-        }
-      }
+    } else if (!recurring && firstPaymentDate && nextDueDate) {
+      paidInstallments = calculatePaidInstallmentsFromDates(firstPaymentDate, nextDueDate);
     }
 
-    const finalFirstPaymentDate = normalizeDateInput(accountFirstDueInput.value, "");
+    const finalFirstPaymentDate = firstPaymentDate;
 
     return {
       name: String(accountNameInput.value || "").trim(),
@@ -1232,7 +1220,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (!editingAccountId) {
         await apiFetch("/accounts", "POST", {
           ...payload,
-          paidInstallments: 0,
+paidInstallments: payload.paidInstallments,
         });
         showAlert("Conta criada com sucesso", "success", "check-circle");
       } else {
