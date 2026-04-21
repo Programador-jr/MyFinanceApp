@@ -70,6 +70,10 @@
     btn.dataset.bound = "1";
   }
 
+  function isMobile() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  }
+
   function updateInstallButton() {
     const btn = getInstallButton();
     if (!btn) return;
@@ -324,6 +328,10 @@
   });
 
   document.addEventListener("DOMContentLoaded", init);
+
+  document.addEventListener("navbarLoaded", () => {
+    setTimeout(updateInstallButton, 100);
+  });
 
   if (document.readyState === "complete" || document.readyState === "interactive") {
     init();

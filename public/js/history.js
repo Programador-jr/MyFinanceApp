@@ -16,6 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
     filterGroup: document.getElementById("filterGroup"),
     filterCategory: document.getElementById("filterCategory"),
     filterMember: document.getElementById("filterMember"),
+    filterValue: document.getElementById("filterValue"),
     filterMinValue: document.getElementById("filterMinValue"),
     filterMaxValue: document.getElementById("filterMaxValue"),
     filterSort: document.getElementById("filterSort"),
@@ -670,6 +671,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function readFilters() {
+    const valueRaw = String(els.filterValue.value || "").trim();
+    const exactValue = valueRaw ? toNumber(valueRaw, null) : null;
     const minValueRaw = String(els.filterMinValue.value || "").trim();
     const maxValueRaw = String(els.filterMaxValue.value || "").trim();
     const minValue = minValueRaw ? toNumber(minValueRaw, 0) : null;
@@ -687,6 +690,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     return {
+      exactValue: exactValue,
       search: normalizeText(els.filterSearch.value),
       period,
       startDate: range.start,
@@ -990,6 +994,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (filters.categoryKey !== "all" && tx.categoryKey !== filters.categoryKey) return false;
       if (filters.memberKey !== "all" && tx.actorKey !== filters.memberKey) return false;
       if (!isInsideDateRange(tx.dateObj, filters.startDate, filters.endDate)) return false;
+      if (filters.exactValue !== null && Math.abs(tx.value - filters.exactValue) > 0.01) return false;
       if (filters.minValue !== null && tx.value < filters.minValue) return false;
       if (filters.maxValue !== null && tx.value > filters.maxValue) return false;
       return true;
@@ -1117,6 +1122,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const startLabel = filters.startDate ? formatCsvDateParts(filters.startDate).date : "-";
     const endLabel = filters.endDate ? formatCsvDateParts(filters.endDate).date : "-";
+    const exactValueLabel = filters.exactValue !== null ? formatCsvNumber(filters.exactValue) : "-";
     const minValueLabel = filters.minValue !== null ? formatCsvNumber(filters.minValue) : "-";
     const maxValueLabel = filters.maxValue !== null ? formatCsvNumber(filters.maxValue) : "-";
 
@@ -1140,6 +1146,7 @@ document.addEventListener("DOMContentLoaded", () => {
       ["Categoria", categoryLabel],
       ["Membro", memberLabel],
       ["Busca", searchTerm],
+      ["Valor exato (R$)", exactValueLabel],
       ["Valor minimo (R$)", minValueLabel],
       ["Valor maximo (R$)", maxValueLabel],
       ["Ordenacao", sortLabel],
@@ -1234,6 +1241,7 @@ document.addEventListener("DOMContentLoaded", () => {
     els.filterGroup.value = "all";
     els.filterCategory.value = "all";
     els.filterMember.value = "all";
+    els.filterValue.value = "";
     els.filterMinValue.value = "";
     els.filterMaxValue.value = "";
     els.filterSort.value = "newest";
@@ -1250,6 +1258,7 @@ document.addEventListener("DOMContentLoaded", () => {
     els.filterCategory.addEventListener("change", () => applyFilters(true));
     els.filterMember.addEventListener("change", () => applyFilters(true));
     els.filterSort.addEventListener("change", () => applyFilters(true));
+    els.filterValue.addEventListener("input", debouncedApply);
     els.filterMinValue.addEventListener("input", debouncedApply);
     els.filterMaxValue.addEventListener("input", debouncedApply);
 
