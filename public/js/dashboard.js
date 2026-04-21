@@ -1080,15 +1080,26 @@ function normalizeDashboardAccount(raw) {
 }
 
 function addMonthsISO(baseIsoDate, monthsToAdd) {
- const base = parseDashboardDate(baseIsoDate);
+  const base = parseDashboardDate(baseIsoDate);
   if (!(base instanceof Date) || Number.isNaN(base.getTime())) return "";
   const copy = new Date(base);
-  copy.setMonth(copy.getMonth() + toNumber(monthsToAdd, 0));
+  copy.setMonth(copy.getMonth() + monthsToAdd);
   if (typeof toLocalISODate === "function") return toLocalISODate(copy);
   const y = copy.getFullYear();
   const m = String(copy.getMonth() + 1).padStart(2, "0");
   const d = String(copy.getDate()).padStart(2, "0");
   return `${y}-${m}-${d}`;
+}
+
+function calculatePaidInstallmentsFromDates(firstDueDate, nextDueDate) {
+  const first = parseDashboardDate(firstDueDate);
+  const next = parseDashboardDate(nextDueDate);
+  if (!first || !next) return 0;
+  if (first > next) return 0;
+
+  let monthsDiff = (next.getFullYear() - first.getFullYear()) * 12 +
+                (next.getMonth() - first.getMonth());
+  return Math.max(monthsDiff, 0);
 }
 
 function formatDateBR(isoDate) {
@@ -1161,8 +1172,18 @@ function calculateDashboardAccount(account) {
   const downPayment = Math.max(toNumber(account.downPayment, 0), 0);
   const financedAmount = installmentValue * installments;
   const totalAccountValue = downPayment + financedAmount;
+
+  const calculatedPaidFromDates = calculatePaidInstallmentsFromDates(
+    account.firstPaymentDate || account.firstDueDate,
+    account.nextDueDate
+  );
   const paidInstallments = Math.min(
-    Math.max(Math.floor(toNumber(account.paidInstallments, 0)), 0),
+    Math.max(
+      toNumber(account.paidInstallments) > 0
+        ? toNumber(account.paidInstallments)
+        : calculatedPaidFromDates,
+      0
+    ),
     installments
   );
   const paidAmount = installmentValue * paidInstallments;

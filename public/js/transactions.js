@@ -62,6 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Estado
   let editingTransactionId = null;
+  let lastTransactionFormValues = null;
   let transactionToDelete = null;
   let cachedCategories = null;
   const latestTransactionsById = new Map();
@@ -673,9 +674,15 @@ document.addEventListener("DOMContentLoaded", () => {
     setLoading(submitBtn, true);
 
     try {
+      const formValue = toAmount(document.getElementById("value").value, 0);
+      if (!formValue || formValue <= 0) {
+        showAlert("Informe um valor maior que zero", "warning", "triangle-exclamation");
+        return;
+      }
+
       const payload = {
         type: document.getElementById("type").value,
-        value: toAmount(document.getElementById("value").value, 0),
+        value: formValue,
         category: document.getElementById("category").value,
         group: document.getElementById("group").value,
         date: toApiDateValue(document.getElementById("date").value),
@@ -684,11 +691,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
       await apiFetch("/transactions", "POST", payload);
 
+      lastTransactionFormValues = {
+        type: document.getElementById("type").value,
+        category: document.getElementById("category").value,
+        group: document.getElementById("group").value,
+        date: document.getElementById("date").value
+      };
+
       form.reset();
 
-      // Define data atual novamente
-      const today = todayLocalISO();
-      document.getElementById("date").value = today;
+      if (lastTransactionFormValues) {
+        document.getElementById("type").value = lastTransactionFormValues.type || "expense";
+        document.getElementById("category").value = lastTransactionFormValues.category || "";
+        document.getElementById("group").value = lastTransactionFormValues.group || "variable";
+        document.getElementById("date").value = lastTransactionFormValues.date || todayLocalISO();
+        loadCategories(lastTransactionFormValues.type || "expense");
+      } else {
+        document.getElementById("date").value = todayLocalISO();
+      }
 
       showAlert("Transação criada com sucesso!", "success", "check-circle");
 
